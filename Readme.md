@@ -1,8 +1,7 @@
 # Личный проект «Кекстаграм» [![Build status][travis-image]][travis-url]
 
 * Студент: [Наталья Житницкая](https://up.htmlacademy.ru/javascript/14/user/140563).
-* Наставник: `Неизвестно`.
-
+* Наставник: [Мария Филиппова](https://htmlacademy.ru/profile/marusya).
 ---
 
 _Не удаляйте и не обращайте внимание на файлы:_<br>

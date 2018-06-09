@@ -4,12 +4,12 @@ var QUANTITY = 25; // Количество элементов для вывод�
 var likes = {
   min: 15,
   max: 200
-}
+};
 
 var comments = {
   possible: 5, //  возможно до 5 комментариев
   min: 1, // в каждом от 1
-  max: 2,  //  до 2 предложений
+  max: 2, // до 2 предложений
   avatarCount: 6, // существует 6 типов аватарок
   txt: [
     'Всё отлично!',
@@ -53,9 +53,9 @@ var getShuffled = function (array) {
 // Создание текста комментария
 var getText = function (min, max) {
   var variety = getShuffled(comments.txt);
-  var length = getRandomNum(min, max) // получили нужное количество предложений
+  var length = getRandomNum(min, max); // получили нужное количество предложений
   var text = variety.slice(0, length); // возвращаем из списка это количество
-  return text.join(' ');  // возвращаю текст комментария строкой
+  return text.join(' '); // возвращаю текст комментария строкой
 };
 
 
@@ -67,9 +67,10 @@ var getContent = function (quantity) {
     var currentLikes = getRandomNum(likes.min, likes.max); // Определяем количество лайков
 
     var currentComments = [];
-    for (var j = 0; j < getRandomNum(1, comments.possible); j++) { // Заполняем массив комментариев
+    // Заполняем массив комментариев
+    for (var j = 0; j < getRandomNum(1, comments.possible); j++) {
       currentComments[j] = getText(comments.min, comments.max);
-    };
+    }
 
     var descriptionIndex = getRandomNum(0, descriptions.length - 1);
     var description = descriptions[descriptionIndex];
@@ -99,7 +100,7 @@ var getElement = function (info) {
 };
 
 // 3. Заполянем блок на странице DOM-элементами
-window.renderElement = function (info) {
+var renderElement = function (info) {
   var box = document.querySelector('.pictures');
   var fragment = document.createDocumentFragment();
 
@@ -118,9 +119,9 @@ var showBigPicture = function (photoId) {
 
   // Clear comments
   var ul = bigPicture.querySelector('.social__comments');
-  while(ul.firstChild) {
+  while (ul.firstChild) {
     ul.removeChild(ul.firstChild);
-  };
+  }
 
   // Open Photo
   bigPicture.querySelector('.big-picture__img img').src = photoId.url;
@@ -148,7 +149,7 @@ var showBigPicture = function (photoId) {
     var p = document.createElement('p');
     p.textContent = photoId.comments[i];
     li.appendChild(p);
-  };
+  }
 
   // 5. Спрячьте блоки
   bigPicture.querySelector('.social__comment-count').classList.add('visually-hidden');
@@ -158,5 +159,5 @@ var showBigPicture = function (photoId) {
 
 
 var fish = getContent(QUANTITY); // Создаем "рыбный" контент
-renderElement(fish); //выводим превьюшки
+renderElement(fish); // выводим превьюшки
 showBigPicture(fish[0]); // Открываем первое фото

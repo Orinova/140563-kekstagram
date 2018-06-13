@@ -1,17 +1,17 @@
 'use strict';
-var QUANTITY = 25; // Количество элементов для вывода на страницу
+var PHOTO_COUNT = 25;
+var AVATAR_VARIANTS = 6;
 
 var likes = {
-  min: 15,
-  max: 200
+  MIN: 15,
+  MAX: 200
 };
 
 var comments = {
-  possible: 5, //  возможно до 5 комментариев
-  min: 1, // в каждом от 1
-  max: 2, // до 2 предложений
-  avatarCount: 6, // существует 6 типов аватарок
-  txt: [
+  MAX: 5, //  возможно до 5 комментариев
+  SENTENCE_MIN: 1, // в каждом от 1
+  SENTENCE_MAX: 2, // до 2 предложений
+  REPLICAS: [
     'Всё отлично!',
     'В целом всё неплохо. Но не всё.',
     'Когда вы делаете фотографию, хорошо бы убирать палец из кадра. В конце концов это просто непрофессионально.',
@@ -32,14 +32,11 @@ var descriptions = [
 
 
 // Генератор случайных чисел
-// https://teamtreehouse.com/community/mathfloor-mathrandom-max-min-1-min-explanation
 var getRandomNum = function (min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 };
 
 // Тасование массива
-// http://thenewcode.com/1095/Shuffling-and-Sorting-JavaScript-Arrays
-// Обязательно ли названия функций, содержащих return начинать с "get"?
 var getShuffled = function (array) {
   for (var i = array.length - 1; i > 0; i--) {
     var j = getRandomNum(0, i);
@@ -52,7 +49,7 @@ var getShuffled = function (array) {
 
 // Создание текста комментария
 var getText = function (min, max) {
-  var variety = getShuffled(comments.txt);
+  var variety = getShuffled(comments.REPLICAS);
   var length = getRandomNum(min, max); // получили нужное количество предложений
   var text = variety.slice(0, length); // возвращаем из списка это количество
   return text.join(' '); // возвращаю текст комментария строкой
@@ -61,51 +58,48 @@ var getText = function (min, max) {
 
 // 1. Генерация массива случайных данных
 var getContent = function (quantity) {
-  var info = [];
+  var photos = [];
 
   for (var i = 0; i < quantity; i++) {
-    var currentLikes = getRandomNum(likes.min, likes.max); // Определяем количество лайков
-
     var currentComments = [];
     // Заполняем массив комментариев
-    for (var j = 0; j < getRandomNum(1, comments.possible); j++) {
-      currentComments[j] = getText(comments.min, comments.max);
+    for (var j = 0; j < getRandomNum(1, comments.MAX); j++) {
+      currentComments[j] = getText(comments.SENTENCE_MIN, comments.SENTENCE_MAX);
     }
 
-    var descriptionIndex = getRandomNum(0, descriptions.length - 1);
-    var description = descriptions[descriptionIndex];
-
-    info[i] =
+    // если будет функция генерации комментариев для одной картинки,
+    // тогда здесь можно будет просто написать comments: generateComments();
+    photos[i] =
       {
         url: 'photos/' + (i + 1) + '.jpg',
-        likes: currentLikes,
+        likes: getRandomNum(likes.MIN, likes.MAX),
         comments: currentComments,
-        description: description
+        description: descriptions[getRandomNum(0, descriptions.length - 1)]
       };
   }
-  return info;
+  return photos;
 };
 
 // 2. Создаем DOM элементы
-var getElement = function (info) {
+var getElement = function (photos) {
   var template = document.querySelector('#picture').content;
   var element = template.cloneNode(true);
 
-  element.querySelector('.picture__img').alt = info.description;
-  element.querySelector('.picture__img').src = info.url;
-  element.querySelector('.picture__stat--likes').textContent = info.likes;
-  element.querySelector('.picture__stat--comments').textContent = info.comments.length;
+  element.querySelector('.picture__img').alt = photos.description;
+  element.querySelector('.picture__img').src = photos.url;
+  element.querySelector('.picture__stat--likes').textContent = photos.likes;
+  element.querySelector('.picture__stat--comments').textContent = photos.comments.length;
 
   return element;
 };
 
 // 3. Заполянем блок на странице DOM-элементами
-var renderElement = function (info) {
+var renderElement = function (photos) {
   var box = document.querySelector('.pictures');
   var fragment = document.createDocumentFragment();
 
-  for (var i = 0; i < info.length; i++) {
-    fragment.appendChild(getElement(info[i]));
+  for (var i = 0; i < photos.length; i++) {
+    fragment.appendChild(getElement(photos[i]));
   }
 
   box.appendChild(fragment);
@@ -114,32 +108,32 @@ var renderElement = function (info) {
 // 4. Покажите элемент .big-picture, удалив у него класс .hidden
 // и заполните его данными из созданного массива
 
-var showBigPicture = function (photoId) {
+var showBigPicture = function (photo) {
   var bigPicture = document.querySelector('.big-picture');
 
   // Clear comments
-  var ul = bigPicture.querySelector('.social__comments');
-  while (ul.firstChild) {
-    ul.removeChild(ul.firstChild);
+  var commentsList = bigPicture.querySelector('.social__comments');
+  while (commentsList.firstChild) {
+    commentsList.removeChild(commentsList.firstChild);
   }
 
   // Open Photo
-  bigPicture.querySelector('.big-picture__img img').src = photoId.url;
-  bigPicture.querySelector('.social__caption').textContent = photoId.description;
-  bigPicture.querySelector('.likes-count').textContent = photoId.likes;
-  bigPicture.querySelector('.comments-count').textContent = photoId.comments.length;
+  bigPicture.querySelector('.big-picture__img img').src = photo.url;
+  bigPicture.querySelector('.social__caption').textContent = photo.description;
+  bigPicture.querySelector('.likes-count').textContent = photo.likes;
+  bigPicture.querySelector('.comments-count').textContent = photo.comments.length;
   bigPicture.classList.remove('hidden');
 
   // Open Comments
-  for (var i = 0; i < photoId.comments.length; i++) {
+  for (var i = 0; i < photo.comments.length; i++) {
     var li = document.createElement('li');
     li.classList.add('social__comment');
     li.classList.add('social__comment--text');
-    ul.appendChild(li);
+    commentsList.appendChild(li);
 
     var img = document.createElement('img');
     img.classList.add('social__picture');
-    var imgUrl = getRandomNum(1, comments.avatarCount);
+    var imgUrl = getRandomNum(1, AVATAR_VARIANTS);
     img.src = 'img/avatar-' + imgUrl + '.svg';
     img.alt = 'Аватар комментатора фотографии';
     img.width = 35;
@@ -147,7 +141,7 @@ var showBigPicture = function (photoId) {
     li.appendChild(img);
 
     var p = document.createElement('p');
-    p.textContent = photoId.comments[i];
+    p.textContent = photo.comments[i];
     li.appendChild(p);
   }
 
@@ -158,6 +152,6 @@ var showBigPicture = function (photoId) {
 };
 
 
-var fish = getContent(QUANTITY); // Создаем "рыбный" контент
-renderElement(fish); // выводим превьюшки
-showBigPicture(fish[0]); // Открываем первое фото
+var photos = getContent(PHOTO_COUNT); // Создаем "рыбный" контент
+renderElement(photos); // выводим превьюшки
+showBigPicture(photos[0]); // Открываем первое фото

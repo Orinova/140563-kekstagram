@@ -9,7 +9,6 @@ var likes = {
 
 var comments = {
   MAX: 5, //  возможно до 5 комментариев
-  SENTENCE_MIN: 1, // в каждом от 1
   SENTENCE_MAX: 2, // до 2 предложений
   REPLICAS: [
     'Всё отлично!',
@@ -47,12 +46,19 @@ var getShuffled = function (array) {
   return array;
 };
 
-// Создание текста комментария
-var getText = function (min, max) {
-  var variety = getShuffled(comments.REPLICAS);
-  var length = getRandomNum(min, max); // получили нужное количество предложений
-  var text = variety.slice(0, length); // возвращаем из списка это количество
-  return text.join(' '); // возвращаю текст комментария строкой
+var generateComments = function (sentenceMax) {
+  var currentComments = [];
+  for (var j = 0; j < getRandomNum(1, comments.MAX); j++) { // количество комментариев, которое будет у фото
+
+    var variety = getShuffled(comments.REPLICAS); // перетряхиваем массив вариантов
+    var length = getRandomNum(1, sentenceMax); // получили нужное количество предложений
+    var text = variety.slice(0, length); // возвращаем из списка это количество
+
+    // сюда нужна проверка: если получившийся text совпадает с предыдущими наборами в currentComments, то выбираем заного
+
+    currentComments[j] = (length > 1) ? text.join(' ') : text.join('');
+  }
+  return currentComments;
 };
 
 
@@ -61,19 +67,12 @@ var getContent = function (quantity) {
   var photos = [];
 
   for (var i = 0; i < quantity; i++) {
-    var currentComments = [];
     // Заполняем массив комментариев
-    for (var j = 0; j < getRandomNum(1, comments.MAX); j++) {
-      currentComments[j] = getText(comments.SENTENCE_MIN, comments.SENTENCE_MAX);
-    }
-
-    // если будет функция генерации комментариев для одной картинки,
-    // тогда здесь можно будет просто написать comments: generateComments();
     photos[i] =
       {
         url: 'photos/' + (i + 1) + '.jpg',
         likes: getRandomNum(likes.MIN, likes.MAX),
-        comments: currentComments,
+        comments: generateComments(comments.SENTENCE_MAX),
         description: descriptions[getRandomNum(0, descriptions.length - 1)]
       };
   }
@@ -109,13 +108,20 @@ var renderElement = function (photos) {
 // и заполните его данными из созданного массива
 
 var showBigPicture = function (photo) {
-  var bigPicture = document.querySelector('.big-picture');
+  var bigPicture = document.querySelector('.big-picture'); // ограничиваемся экраном большой фотки
+  var socialComments = bigPicture.querySelector('.social__comments'); // список комментариев (ul)
+  var socialComment = bigPicture.querySelector('.social__comment').cloneNode(true);
+  socialComment.classList.add('social__comment--text'); // получили шаблон для комментрия (li)
+  socialComments.innerHTML = ''; // Чистим от прошлых комментариев
 
-  // Clear comments
-  var commentsList = bigPicture.querySelector('.social__comments');
-  while (commentsList.firstChild) {
-    commentsList.removeChild(commentsList.firstChild);
+  var fragmentBigPicture = document.createDocumentFragment();
+  for (var i = 0; i < photo.comments.length; i++) {
+    var comment = socialComment.cloneNode(true);
+    comment.querySelector('.social__picture').src = 'img/avatar-' + getRandomNum(1, AVATAR_VARIANTS) + '.svg';
+    comment.querySelector('.social__text').textContent = photo.comments[i];
+    fragmentBigPicture.appendChild(comment);
   }
+  socialComments.appendChild(fragmentBigPicture);
 
   // Open Photo
   bigPicture.querySelector('.big-picture__img img').src = photo.url;
@@ -124,26 +130,6 @@ var showBigPicture = function (photo) {
   bigPicture.querySelector('.comments-count').textContent = photo.comments.length;
   bigPicture.classList.remove('hidden');
 
-  // Open Comments
-  for (var i = 0; i < photo.comments.length; i++) {
-    var li = document.createElement('li');
-    li.classList.add('social__comment');
-    li.classList.add('social__comment--text');
-    commentsList.appendChild(li);
-
-    var img = document.createElement('img');
-    img.classList.add('social__picture');
-    var imgUrl = getRandomNum(1, AVATAR_VARIANTS);
-    img.src = 'img/avatar-' + imgUrl + '.svg';
-    img.alt = 'Аватар комментатора фотографии';
-    img.width = 35;
-    img.height = 35;
-    li.appendChild(img);
-
-    var p = document.createElement('p');
-    p.textContent = photo.comments[i];
-    li.appendChild(p);
-  }
 
   // 5. Спрячьте блоки
   bigPicture.querySelector('.social__comment-count').classList.add('visually-hidden');

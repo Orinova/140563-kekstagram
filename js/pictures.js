@@ -1,5 +1,6 @@
 'use strict';
-var PHOTO_COUNT = 25;
+
+var PHOTOS_COUNT = 25;
 var AVATAR_VARIANTS = 6;
 
 var likes = {
@@ -28,7 +29,6 @@ var descriptions = [
   'Цените каждое мгновенье. Цените тех, кто рядом с вами и отгоняйте все сомненья. Не обижайте всех словами......',
   'Вот это тачка!'
 ];
-
 
 // Генератор случайных чисел
 var getRandomNum = function (min, max) {
@@ -61,13 +61,10 @@ var generateComments = function (sentenceMax) {
   return currentComments;
 };
 
-
 // 1. Генерация массива случайных данных
-var getContent = function (quantity) {
+var createContent = function (photosCount) {
   var photos = [];
-
-  for (var i = 0; i < quantity; i++) {
-    // Заполняем массив комментариев
+  for (var i = 0; i < photosCount; i++) {
     photos[i] =
       {
         url: 'photos/' + (i + 1) + '.jpg',
@@ -79,30 +76,27 @@ var getContent = function (quantity) {
   return photos;
 };
 
+
 // 2. Создаем DOM элементы
-var getElement = function (photos) {
-  var template = document.querySelector('#picture').content;
-  var element = template.cloneNode(true);
-
-  element.querySelector('.picture__img').alt = photos.description;
-  element.querySelector('.picture__img').src = photos.url;
-  element.querySelector('.picture__stat--likes').textContent = photos.likes;
-  element.querySelector('.picture__stat--comments').textContent = photos.comments.length;
-
-  return element;
+var createPhotoElement = function (photos) {
+  var photoElement = document.querySelector('#picture').content.cloneNode(true);
+  photoElement.querySelector('.picture__img').alt = photos.description;
+  photoElement.querySelector('.picture__img').src = photos.url;
+  photoElement.querySelector('.picture__stat--likes').textContent = photos.likes;
+  photoElement.querySelector('.picture__stat--comments').textContent = photos.comments.length;
+  return photoElement;
 };
 
 // 3. Заполянем блок на странице DOM-элементами
-var renderElement = function (photos) {
-  var box = document.querySelector('.pictures');
+var fillPicturesList = function (photos) {
+  var picturesSection = document.querySelector('.pictures');
   var fragment = document.createDocumentFragment();
-
   for (var i = 0; i < photos.length; i++) {
-    fragment.appendChild(getElement(photos[i]));
+    fragment.appendChild(createPhotoElement(photos[i]));
   }
-
-  box.appendChild(fragment);
+  picturesSection.appendChild(fragment);
 };
+
 
 // 4. Покажите элемент .big-picture, удалив у него класс .hidden
 // и заполните его данными из созданного массива
@@ -138,6 +132,6 @@ var showBigPicture = function (photo) {
 };
 
 
-var photos = getContent(PHOTO_COUNT); // Создаем "рыбный" контент
-renderElement(photos); // выводим превьюшки
+var photos = createContent(PHOTOS_COUNT); // Создаем "рыбный" контент
+fillPicturesList(photos); // выводим превьюшки
 showBigPicture(photos[0]); // Открываем первое фото

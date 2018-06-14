@@ -21,7 +21,7 @@ var comments = {
   ]
 };
 
-var descriptions = [
+var DECRIPTIONS = [
   'Тестим новую камеру!',
   'Затусили с друзьями на море',
   'Как же круто тут кормят',
@@ -70,7 +70,7 @@ var createContent = function (photosCount) {
         url: 'photos/' + (i + 1) + '.jpg',
         likes: getRandomNum(likes.MIN, likes.MAX),
         comments: generateComments(comments.SENTENCE_MAX),
-        description: descriptions[getRandomNum(0, descriptions.length - 1)]
+        description: DECRIPTIONS[getRandomNum(0, DECRIPTIONS.length - 1)]
       };
   }
   return photos;
@@ -103,10 +103,10 @@ var fillPicturesList = function (photos) {
 
 var showBigPicture = function (photo) {
   var bigPicture = document.querySelector('.big-picture'); // ограничиваемся экраном большой фотки
-  var socialComments = bigPicture.querySelector('.social__comments'); // список комментариев (ul)
+  var commentsList = bigPicture.querySelector('.social__comments'); // список комментариев (ul)
   var socialComment = bigPicture.querySelector('.social__comment').cloneNode(true);
   socialComment.classList.add('social__comment--text'); // получили шаблон для комментрия (li)
-  socialComments.innerHTML = ''; // Чистим от прошлых комментариев
+  commentsList.innerHTML = ''; // Чистим от прошлых комментариев
 
   var fragmentBigPicture = document.createDocumentFragment();
   for (var i = 0; i < photo.comments.length; i++) {
@@ -115,7 +115,7 @@ var showBigPicture = function (photo) {
     comment.querySelector('.social__text').textContent = photo.comments[i];
     fragmentBigPicture.appendChild(comment);
   }
-  socialComments.appendChild(fragmentBigPicture);
+  commentsList.appendChild(fragmentBigPicture);
 
   // Open Photo
   bigPicture.querySelector('.big-picture__img img').src = photo.url;

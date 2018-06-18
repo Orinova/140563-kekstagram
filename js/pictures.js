@@ -179,8 +179,6 @@ var uploadOverlay = uploadSection.querySelector('.img-upload__overlay');
 var uploadCloseButton = uploadSection.querySelector('.img-upload__cancel');
 var uploadImgPreview = uploadSection.querySelector('.img-upload__preview');
 
-
-
 var openUploadPopup = function () {
   document.querySelector('body').classList.add('modal-open');
   uploadOverlay.classList.remove('hidden');
@@ -189,7 +187,6 @@ var openUploadPopup = function () {
 var closeUploadPopup = function () {
   document.querySelector('body').classList.remove('modal-open');
   uploadFile.value = '';
-  console.log(setScale(scale.DEFAULT));
   setScale(scale.DEFAULT);
   uploadOverlay.classList.add('hidden');
 };
@@ -203,6 +200,7 @@ var escUploadPopup = function (evt) {
 uploadFile.addEventListener('change', openUploadPopup);
 uploadCloseButton.addEventListener('click', closeUploadPopup);
 document.addEventListener('keydown', escUploadPopup);
+
 
 ///////////// 2.1 Начало: Загруженное фото - Масштаб
 var scale = {
@@ -242,48 +240,66 @@ resizeMinus.addEventListener('click', buttonResizeMinusClickHandler);
 
 
 //////////// 2.2 Начало: Загруженное фото - фильтры
+var DEFAULT_EFFECT_VALUE = 100;
 var uploadEffectScale = uploadSection.querySelector('.scale');
 var uploadEffectsList = uploadSection.querySelector('.effects__list');
-var uploadEffectValue = uploadEffectScale.querySelector('.scale__value');
-var effectClass; // Empty variable for effects functions: switchEffects and controlSaturation
+var uploadEffectValue = uploadSection.querySelector('.scale__value');
 
-var switchEffects = function (evt) {
-  uploadImgPreview.classList.remove(effectClass);
+var effects = {
+  chrome: function () {
+    return 'grayscale(' + uploadEffectValue.value / 100 + ')';
+  },
+  sepia: function () {
+    return 'sepia(' + uploadEffectValue.value / 100 + ')';
+  },
+  marvin: function () {
+    return 'invert(' + uploadEffectValue.value + '%)';
+  },
+  phobos: function () {
+    return 'blur(' + uploadEffectValue.value * 3 / 100 + 'px)';
+  },
+  heat: function () {
+    return 'brightness(' + (uploadEffectValue.value * 2 / 100 + 1) + ')';
+  },
+  none: function () {
+    return '';
+  }
+};
 
+
+var setCurrentEffect = function (evt) {
   if (evt.target.tagName === 'INPUT') {
-    uploadImgPreview.style.filter = '';
+    var currentEffect = evt.target.value;
 
-    var idText = evt.target.id;
-    idText = idText.split('-')[1];
-    effectClass = 'effects__preview--' + idText;
-    uploadImgPreview.classList.add(effectClass);
+    // сбрасываем стили, потом добавляем класс фильтры
+    uploadImgPreview.className = 'img-upload__preview';
+    uploadImgPreview.classList.add('effects__preview--' + currentEffect);
 
-    if (effectClass === 'effects__preview--none') {
+    // проверяем на необходиость слайдера
+    if (currentEffect === 'none') {
       uploadEffectScale.classList.add('hidden');
     } else {
       uploadEffectScale.classList.remove('hidden');
-    }
+    };
+
+    setEffect(currentEffect);
+  }
+};
+uploadEffectsList.addEventListener('click', setCurrentEffect);
+
+var setEffect = function (currentEffect) {
+  if (currentEffect in effects) {
+    uploadEffectValue.value = DEFAULT_EFFECT_VALUE;
+    uploadImgPreview.style.filter = effects[currentEffect]();
   }
 };
 
-var controlSaturation = function () {
-  if (effectClass === 'effects__preview--chrome') {
-    uploadImgPreview.style.filter = 'grayscale(' + (uploadEffectValue.value / 100) + ')';
-  } else if (effectClass === 'effects__preview--sepia') {
-    uploadImgPreview.style.filter = 'sepia(' + (uploadEffectValue.value / 100) + ')';
-  } else if (effectClass === 'effects__preview--marvin') {
-    uploadImgPreview.style.filter = 'invert(' + uploadEffectValue.value + '%)';
-  } else if (effectClass === 'effects__preview--phobos') {
-    uploadImgPreview.style.filter = 'blur(' + (uploadEffectValue.value * 3 / 100) + 'px)';
-  } else if (effectClass === 'effects__preview--heat') {
-    uploadImgPreview.style.filter = 'brightness(' + ((uploadEffectValue.value * 2 / 100) + 1) + ')';
-  } else {
-    uploadImgPreview.style.filter = '';
-  }
+var setSaturation = function (evt) {
+  console.log(uploadEffectValue.value);
+  uploadEffectValue.value = uploadSection.querySelector('.scale__value');
 };
+uploadEffectScale.addEventListener('mouseup', setSaturation);
 
-uploadEffectsList.addEventListener('click', switchEffects);
-uploadEffectScale.addEventListener('mouseup', controlSaturation);
 
 //////////// 2.2 Конец: Загруженное фото - фильтры
 

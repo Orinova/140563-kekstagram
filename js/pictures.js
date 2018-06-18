@@ -1,23 +1,14 @@
 'use strict';
 
+var KEYCODE_ESC = 27;
 var PHOTOS_COUNT = 25;
 var AVATAR_VARIANTS = 6;
-var KEYCODE_ESC = 27;
 var picturesSection = document.querySelector('.pictures');
-
 var bigPicture = document.querySelector('.big-picture');
-
-var uploadSection = document.querySelector('.img-upload');
-var uploadFile = uploadSection.querySelector('#upload-file');
-var uploadOverlay = uploadSection.querySelector('.img-upload__overlay');
-var uploadCloseButton = uploadSection.querySelector('.img-upload__cancel');
-
-
 var likes = {
   MIN: 15,
   MAX: 200
 };
-
 var comments = {
   MAX: 5, //  возможно до 5 комментариев
   SENTENCE_MAX: 2, // до 2 предложений
@@ -30,7 +21,6 @@ var comments = {
     'Лица у людей на фотке перекошены, как будто их избивают. Как можно было поймать такой неудачный момент?!'
   ]
 };
-
 var DESCRIPTIONS = [
   'Тестим новую камеру!',
   'Затусили с друзьями на море',
@@ -147,108 +137,113 @@ var showBigPicture = function (photo) {
 var photos = createContent(PHOTOS_COUNT);
 fillPicturesList(photos);
 
+
 /////// 1. Начало: Галерея
-
-var openPopup = function () {
-    document.querySelector('body').classList.add('modal-open');
-    bigPicture.classList.remove('hidden');
-};
-
-var closePopup = function () {
-    document.querySelector('body').classList.remove('modal-open');
-    bigPicture.classList.add('hidden');
-};
-
-var openUploadOverlay = function () {
-    document.querySelector('body').classList.add('modal-open');
-    uploadOverlay.classList.remove('hidden');
-};
-uploadFile.addEventListener('change', function () {
-  openUploadOverlay();
-});
-
-var closeUploadOverlay = function () {
-    document.querySelector('body').classList.remove('modal-open');
-    uploadFile.value = '';
-    uploadOverlay.classList.add('hidden');
-};
-uploadCloseButton.addEventListener('click', closeUploadOverlay);
-
-var escUploadOverlay = function (evt) {
-    if (evt.keyCode === KEYCODE_ESC) {
-      document.querySelector('body').classList.remove('modal-open');
-      uploadFile.value = '';
-      uploadOverlay.classList.add('hidden');
-    }
-};
-document.addEventListener('keydown', escUploadOverlay);
-
-var buttonPopupCloseClickHandler = function (evt) {
-  if (evt.target.className === 'big-picture__cancel cancel') closePopup();
-};
-bigPicture.addEventListener('click', buttonPopupCloseClickHandler);
-
-var escGalleryKeydownHandler = function (evt) {
-  if (evt.keyCode === KEYCODE_ESC) closePopup();
-};
-document.addEventListener('keydown', escGalleryKeydownHandler);
-
 var picturePreviewClickHandler = function (evt) {
-  // Q? Я правильно поняла Игоря, что слово Handler обязательно в названии обработчика?
   var target = evt.target;
   if (target.className === 'picture__img') {
     target = target.parentNode;
     var photoIndexNum = target.getAttribute("id").substr(6); // забираю число из id вида photo_00
     showBigPicture(photos[photoIndexNum]);
-    openPopup();
+    openGalleryPopup();
   };
 };
+
+var openGalleryPopup = function () {
+    document.querySelector('body').classList.add('modal-open');
+    bigPicture.classList.remove('hidden');
+};
+
+var closeGalleryPopup = function () {
+    document.querySelector('body').classList.remove('modal-open');
+    bigPicture.classList.add('hidden');
+};
+
+var buttonGalleryCloseClickHandler = function (evt) {
+  if (evt.target.className === 'big-picture__cancel cancel') closeGalleryPopup();
+};
+
+var escGalleryKeydownHandler = function (evt) {
+  if (evt.keyCode === KEYCODE_ESC) closeGalleryPopup();
+};
+document.addEventListener('keydown', escGalleryKeydownHandler);
 picturesSection.addEventListener('click', picturePreviewClickHandler);
+bigPicture.addEventListener('click', buttonGalleryCloseClickHandler);
 /////// 1. Конец: Галерея
 
 
-/////// 2. Начало: Масштаб
-
-var uploadResize = uploadSection.querySelector('.resize');
+////// 2. Начало: Загрузка фото
+var uploadSection = document.querySelector('.img-upload');
+var uploadFile = uploadSection.querySelector('#upload-file');
+var uploadOverlay = uploadSection.querySelector('.img-upload__overlay');
+var uploadCloseButton = uploadSection.querySelector('.img-upload__cancel');
 var uploadImgPreview = uploadSection.querySelector('.img-upload__preview');
-var uploadResizeMinus = uploadResize.querySelector('.resize__control--minus');
-var uploadResizePlus = uploadResize.querySelector('.resize__control--plus');
-var uploadResizeValue = uploadResize.querySelector('.resize__control--value');
-var valueNum = uploadResizeValue.value.slice(0, -1);
 
+
+
+var openUploadPopup = function () {
+  document.querySelector('body').classList.add('modal-open');
+  uploadOverlay.classList.remove('hidden');
+};
+
+var closeUploadPopup = function () {
+  document.querySelector('body').classList.remove('modal-open');
+  uploadFile.value = '';
+  console.log(setScale(scale.DEFAULT));
+  setScale(scale.DEFAULT);
+  uploadOverlay.classList.add('hidden');
+};
+
+var escUploadPopup = function (evt) {
+  if (evt.keyCode === KEYCODE_ESC) {
+    closeUploadPopup();
+  }
+};
+
+uploadFile.addEventListener('change', openUploadPopup);
+uploadCloseButton.addEventListener('click', closeUploadPopup);
+document.addEventListener('keydown', escUploadPopup);
+
+///////////// 2.1 Начало: Загруженное фото - Масштаб
+var scale = {
+  RANGE: 25,
+  MIN: 25,
+  MAX: 100,
+  DEFAULT: 100
+};
+var resize = uploadSection.querySelector('.resize');
+var resizeMinus = resize.querySelector('.resize__control--minus');
+var resizePlus = resize.querySelector('.resize__control--plus');
+var resizeValue = resize.querySelector('.resize__control--value');
+
+var setScale = function (valueNum) {
+  uploadImgPreview.style.transform = 'scale(' + valueNum / 100 + ')';
+  resizeValue.setAttribute('value', valueNum + '%');
+};
 
 var buttonResizePlusClickHandler = function (evt) {
-// переписать в константы "шаг" 25. 75 - это три шага
-  if (valueNum <= 75) {
-    uploadResizeValue.value = (valueNum + 25) + '%';
-    valueNum = valueNum + 25;
-    uploadResizeValue.setAttribute('value', uploadResizeValue.value);
-    uploadImgPreview.style.transform = 'scale(' + valueNum / 100 + ')';
+  var valueNum = resizeValue.value.slice(0, -1);
+  if (valueNum < scale.MAX) {
+    setScale(valueNum += scale.RANGE);
   }
 };
 
 var buttonResizeMinusClickHandler = function (evt) {
-  if (valueNum >= 50) {
-    uploadResizeValue.value = (valueNum - 25) + '%';
-    valueNum = valueNum - 25;
-    uploadResizeValue.setAttribute('value', uploadResizeValue.value);
-    uploadImgPreview.style.transform = 'scale(' + valueNum / 100 + ')';
+  var valueNum = resizeValue.value.slice(0, -1);
+  if (valueNum > scale.MIN) {
+    setScale(valueNum -= scale.RANGE)
   }
 };
 
-uploadResizePlus.addEventListener('click', buttonResizePlusClickHandler);
-uploadResizeMinus.addEventListener('click', buttonResizeMinusClickHandler);
-////// 2. Конец: Масштаб
+resizePlus.addEventListener('click', buttonResizePlusClickHandler);
+resizeMinus.addEventListener('click', buttonResizeMinusClickHandler);
+//////////// 2.1 Конец: Загруженное фото - Масштаб
 
 
 
-/////// 3. Начало: фильтры
-
+//////////// 2.2 Начало: Загруженное фото - фильтры
 var uploadEffectScale = uploadSection.querySelector('.scale');
 var uploadEffectsList = uploadSection.querySelector('.effects__list');
-var uploadEffectScaleLine = uploadEffectScale.querySelector('.scale__line');
-var uploadEffectScalePin = uploadEffectScale.querySelector('.scale__pin');
-var uploadEffectScaleLevel = uploadEffectScale.querySelector('.scale__level');
 var uploadEffectValue = uploadEffectScale.querySelector('.scale__value');
 var effectClass; // Empty variable for effects functions: switchEffects and controlSaturation
 
@@ -290,7 +285,9 @@ var controlSaturation = function () {
 uploadEffectsList.addEventListener('click', switchEffects);
 uploadEffectScale.addEventListener('mouseup', controlSaturation);
 
-////// 3. Конец: фильтры
+//////////// 2.2 Конец: Загруженное фото - фильтры
+
+////// 2. Конец: галерея
 
 
 // console.log();

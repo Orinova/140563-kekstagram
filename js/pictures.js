@@ -244,7 +244,8 @@ var DEFAULT_EFFECT_VALUE = 100;
 var uploadEffectScale = uploadSection.querySelector('.scale');
 var uploadEffectsList = uploadSection.querySelector('.effects__list');
 var uploadEffectValue = uploadSection.querySelector('.scale__value');
-
+var uploadEffectPin = uploadSection.querySelector('.scale__pin');
+var uploadEffectLine = uploadSection.querySelector('.scale__line');
 var effects = {
   chrome: function () {
     return 'grayscale(' + uploadEffectValue.value / 100 + ')';
@@ -266,44 +267,36 @@ var effects = {
   }
 };
 
-
+var currentEffect;
 var setCurrentEffect = function (evt) {
   if (evt.target.tagName === 'INPUT') {
-    var currentEffect = evt.target.value;
-
+    currentEffect = evt.target.value;
     // сбрасываем стили, потом добавляем класс фильтры
     uploadImgPreview.className = 'img-upload__preview';
     uploadImgPreview.classList.add('effects__preview--' + currentEffect);
 
-    // проверяем на необходиость слайдера
+    // проверяем на необходимость слайдера
     if (currentEffect === 'none') {
       uploadEffectScale.classList.add('hidden');
     } else {
       uploadEffectScale.classList.remove('hidden');
     };
 
-    setEffect(currentEffect);
+    // Накладываем фильтр
+    uploadEffectValue.value = DEFAULT_EFFECT_VALUE; // указываем стартовый уровень
+    uploadImgPreview.style.filter = effects[currentEffect](); // выводим фильтр
   }
 };
 uploadEffectsList.addEventListener('click', setCurrentEffect);
 
-var setEffect = function (currentEffect) {
-  if (currentEffect in effects) {
-    uploadEffectValue.value = DEFAULT_EFFECT_VALUE;
-    uploadImgPreview.style.filter = effects[currentEffect]();
-  }
+var setSaturation = function () {
+  uploadEffectValue.value = getSaturationLevel();
+  uploadImgPreview.style.filter = effects[currentEffect]();
 };
-
-var setSaturation = function (evt) {
-  console.log(uploadEffectValue.value);
-  uploadEffectValue.value = uploadSection.querySelector('.scale__value');
+var getSaturationLevel = function () {
+  return Math.round(uploadEffectPin.offsetLeft / uploadEffectLine.offsetWidth * 100);
 };
-uploadEffectScale.addEventListener('mouseup', setSaturation);
-
-
+uploadEffectPin.addEventListener('mouseup', setSaturation);
 //////////// 2.2 Конец: Загруженное фото - фильтры
-
 ////// 2. Конец: галерея
 
-
-// console.log();

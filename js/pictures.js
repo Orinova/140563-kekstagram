@@ -2,6 +2,7 @@
 
 var PHOTOS_COUNT = 25;
 var AVATAR_VARIANTS = 6;
+var KEYCODE_ESC = 27;
 var picturesSection = document.querySelector('.pictures');
 
 var bigPicture = document.querySelector('.big-picture');
@@ -10,11 +11,7 @@ var uploadSection = document.querySelector('.img-upload');
 var uploadFile = uploadSection.querySelector('#upload-file');
 var uploadOverlay = uploadSection.querySelector('.img-upload__overlay');
 var uploadCloseButton = uploadSection.querySelector('.img-upload__cancel');
-var uploadScalePin = uploadSection.querySelector('.scale__pin');
-var uploadScaleLevel = uploadSection.querySelector('.scale__level');
 
-
-var KEYCODE_ESC = 27;
 
 var likes = {
   MIN: 15,
@@ -106,10 +103,11 @@ var fillPicturesList = function (photos) {
     значит я могу присваивать им идентификатор по мере вывода и быть уверенной, что
     цифра в id на превью соответвует позиции в массиве объектов фотографий.
 
-    Если бы я записала в объект, то в случае удаления какой-нибудь из  фотографий
-    id перестал бы соответвовать номеру позиции в массиве и потребовалось бы больше проверок.
+    Мы с тобой обсуждали о том, что бы записать идентификатор в объект photos,
+    но в таком случае при удалении какой-нибудь из  фотографий
+    id перестал бы соответвовать номеру позиции в массиве и потребовалось бы написать больше проверок.
 
-    Так же я заморочилась добавляя префикс photo_ предположив,
+    Ещё добавила префикс photo_ предположив,
     что по мере работы у меня может появиться потребность в id для других объектов */
     fragment.appendChild(createPhotoElement('photo_' + i, photos[i]));
   }
@@ -149,16 +147,7 @@ var showBigPicture = function (photo) {
 var photos = createContent(PHOTOS_COUNT);
 fillPicturesList(photos);
 
-/* ТЗ
-4.3. При нажатии на любую из миниатюр, показывается блок .big-picture,
-содержащий полноэкранное изображение с количеством лайков и комментариев.
-Злементу body задаётся класс modal-open. Данные, описывающие изображение
-должны подставляться в соответствующие элементы в разметке.
-
-4.4. Выход из полноэкранного режима просмотра фотографии осуществляется либо
-нажатием на иконку крестика .big-picture__cancel в правом верхнем углу блока
-.big-picture, либо нажатием на клавишу Esc.
-*/
+/////// 1. Начало: Галерея
 
 var openPopup = function () {
     document.querySelector('body').classList.add('modal-open');
@@ -194,8 +183,6 @@ var escUploadOverlay = function (evt) {
 };
 document.addEventListener('keydown', escUploadOverlay);
 
-
-// ОБРАБОТЧИКИ
 var buttonPopupCloseClickHandler = function (evt) {
   if (evt.target.className === 'big-picture__cancel cancel') closePopup();
 };
@@ -217,14 +204,93 @@ var picturePreviewClickHandler = function (evt) {
   };
 };
 picturesSection.addEventListener('click', picturePreviewClickHandler);
+/////// 1. Конец: Галерея
 
 
+/////// 2. Начало: Масштаб
 
-var pinMouseupHandler = function () {
-  console.log('Обработчик события mouseup');
+var uploadResize = uploadSection.querySelector('.resize');
+var uploadImgPreview = uploadSection.querySelector('.img-upload__preview');
+var uploadResizeMinus = uploadResize.querySelector('.resize__control--minus');
+var uploadResizePlus = uploadResize.querySelector('.resize__control--plus');
+var uploadResizeValue = uploadResize.querySelector('.resize__control--value');
+var valueNum = uploadResizeValue.value.slice(0, -1);
+
+
+var buttonResizePlusClickHandler = function (evt) {
+// переписать в константы "шаг" 25. 75 - это три шага
+  if (valueNum <= 75) {
+    uploadResizeValue.value = (valueNum + 25) + '%';
+    valueNum = valueNum + 25;
+    uploadResizeValue.setAttribute('value', uploadResizeValue.value);
+    uploadImgPreview.style.transform = 'scale(' + valueNum / 100 + ')';
+  }
 };
-uploadScalePin.addEventListener('mouseup', pinMouseupHandler);
 
+var buttonResizeMinusClickHandler = function (evt) {
+  if (valueNum >= 50) {
+    uploadResizeValue.value = (valueNum - 25) + '%';
+    valueNum = valueNum - 25;
+    uploadResizeValue.setAttribute('value', uploadResizeValue.value);
+    uploadImgPreview.style.transform = 'scale(' + valueNum / 100 + ')';
+  }
+};
+
+uploadResizePlus.addEventListener('click', buttonResizePlusClickHandler);
+uploadResizeMinus.addEventListener('click', buttonResizeMinusClickHandler);
+////// 2. Конец: Масштаб
+
+
+
+/////// 3. Начало: фильтры
+
+var uploadEffectScale = uploadSection.querySelector('.scale');
+var uploadEffectsList = uploadSection.querySelector('.effects__list');
+var uploadEffectScaleLine = uploadEffectScale.querySelector('.scale__line');
+var uploadEffectScalePin = uploadEffectScale.querySelector('.scale__pin');
+var uploadEffectScaleLevel = uploadEffectScale.querySelector('.scale__level');
+var uploadEffectValue = uploadEffectScale.querySelector('.scale__value');
+var effectClass; // Empty variable for effects functions: switchEffects and controlSaturation
+
+var switchEffects = function (evt) {
+  uploadImgPreview.classList.remove(effectClass);
+
+  if (evt.target.tagName === 'INPUT') {
+    uploadImgPreview.style.filter = '';
+
+    var idText = evt.target.id;
+    idText = idText.split('-')[1];
+    effectClass = 'effects__preview--' + idText;
+    uploadImgPreview.classList.add(effectClass);
+
+    if (effectClass === 'effects__preview--none') {
+      uploadEffectScale.classList.add('hidden');
+    } else {
+      uploadEffectScale.classList.remove('hidden');
+    }
+  }
+};
+
+var controlSaturation = function () {
+  if (effectClass === 'effects__preview--chrome') {
+    uploadImgPreview.style.filter = 'grayscale(' + (uploadEffectValue.value / 100) + ')';
+  } else if (effectClass === 'effects__preview--sepia') {
+    uploadImgPreview.style.filter = 'sepia(' + (uploadEffectValue.value / 100) + ')';
+  } else if (effectClass === 'effects__preview--marvin') {
+    uploadImgPreview.style.filter = 'invert(' + uploadEffectValue.value + '%)';
+  } else if (effectClass === 'effects__preview--phobos') {
+    uploadImgPreview.style.filter = 'blur(' + (uploadEffectValue.value * 3 / 100) + 'px)';
+  } else if (effectClass === 'effects__preview--heat') {
+    uploadImgPreview.style.filter = 'brightness(' + ((uploadEffectValue.value * 2 / 100) + 1) + ')';
+  } else {
+    uploadImgPreview.style.filter = '';
+  }
+};
+
+uploadEffectsList.addEventListener('click', switchEffects);
+uploadEffectScale.addEventListener('mouseup', controlSaturation);
+
+////// 3. Конец: фильтры
 
 
 // console.log();

@@ -104,8 +104,6 @@ var fillPicturesList = function (photos) {
   picturesSection.appendChild(fragment);
 };
 
-
-
 // Покажите элемент .big-picture, удалив у него класс .hidden
 // и заполните его данными из созданного массива
 var showBigPicture = function (photo) {
@@ -137,42 +135,44 @@ var showBigPicture = function (photo) {
 var photos = createContent(PHOTOS_COUNT);
 fillPicturesList(photos);
 
-
-/////// 1. Начало: Галерея
+// ------ 1. Начало: Галерея
 var picturePreviewClickHandler = function (evt) {
   var target = evt.target;
   if (target.className === 'picture__img') {
     target = target.parentNode;
-    var photoIndexNum = target.getAttribute("id").substr(6); // забираю число из id вида photo_00
+    var photoIndexNum = target.getAttribute('id').substr(6); // забираю число из id вида photo_00
     showBigPicture(photos[photoIndexNum]);
     openGalleryPopup();
-  };
+  }
 };
 
 var openGalleryPopup = function () {
-    document.querySelector('body').classList.add('modal-open');
-    bigPicture.classList.remove('hidden');
+  document.querySelector('body').classList.add('modal-open');
+  bigPicture.classList.remove('hidden');
 };
 
 var closeGalleryPopup = function () {
-    document.querySelector('body').classList.remove('modal-open');
-    bigPicture.classList.add('hidden');
+  document.querySelector('body').classList.remove('modal-open');
+  bigPicture.classList.add('hidden');
 };
 
 var buttonGalleryCloseClickHandler = function (evt) {
-  if (evt.target.className === 'big-picture__cancel cancel') closeGalleryPopup();
+  if (evt.target.className === 'big-picture__cancel cancel') {
+    closeGalleryPopup();
+  }
 };
 
 var escGalleryKeydownHandler = function (evt) {
-  if (evt.keyCode === KEYCODE_ESC) closeGalleryPopup();
+  if (evt.keyCode === KEYCODE_ESC) {
+    closeGalleryPopup();
+  }
 };
 document.addEventListener('keydown', escGalleryKeydownHandler);
 picturesSection.addEventListener('click', picturePreviewClickHandler);
 bigPicture.addEventListener('click', buttonGalleryCloseClickHandler);
-/////// 1. Конец: Галерея
+// ------ 1. Конец: Галерея
 
-
-////// 2. Начало: Загрузка фото
+// ------ 2. Начало: Загрузка фото
 var uploadSection = document.querySelector('.img-upload');
 var uploadFile = uploadSection.querySelector('#upload-file');
 var uploadOverlay = uploadSection.querySelector('.img-upload__overlay');
@@ -202,7 +202,7 @@ uploadCloseButton.addEventListener('click', closeUploadPopup);
 document.addEventListener('keydown', escUploadPopup);
 
 
-///////////// 2.1 Начало: Загруженное фото - Масштаб
+// ------------ 2.1 Начало: Загруженное фото - Масштаб
 var scale = {
   RANGE: 25,
   MIN: 25,
@@ -219,27 +219,25 @@ var setScale = function (valueNum) {
   resizeValue.setAttribute('value', valueNum + '%');
 };
 
-var buttonResizePlusClickHandler = function (evt) {
+var buttonResizePlusClickHandler = function () {
   var valueNum = resizeValue.value.slice(0, -1);
   if (valueNum < scale.MAX) {
-    setScale(valueNum += scale.RANGE);
+    setScale(valueNum = +valueNum + scale.RANGE);
   }
 };
 
-var buttonResizeMinusClickHandler = function (evt) {
+var buttonResizeMinusClickHandler = function () {
   var valueNum = resizeValue.value.slice(0, -1);
   if (valueNum > scale.MIN) {
-    setScale(valueNum -= scale.RANGE)
+    setScale(valueNum = +valueNum - scale.RANGE);
   }
 };
 
 resizePlus.addEventListener('click', buttonResizePlusClickHandler);
 resizeMinus.addEventListener('click', buttonResizeMinusClickHandler);
-//////////// 2.1 Конец: Загруженное фото - Масштаб
+// ------------ 2.1 Конец: Загруженное фото - Масштаб
 
-
-
-//////////// 2.2 Начало: Загруженное фото - фильтры
+// ------------ 2.2 Начало: Загруженное фото - фильтры
 var DEFAULT_EFFECT_VALUE = 100;
 var uploadEffectScale = uploadSection.querySelector('.scale');
 var uploadEffectsList = uploadSection.querySelector('.effects__list');
@@ -280,7 +278,7 @@ var setCurrentEffect = function (evt) {
       uploadEffectScale.classList.add('hidden');
     } else {
       uploadEffectScale.classList.remove('hidden');
-    };
+    }
 
     // Накладываем фильтр
     uploadEffectValue.value = DEFAULT_EFFECT_VALUE; // указываем стартовый уровень
@@ -297,6 +295,6 @@ var getSaturationLevel = function () {
   return Math.round(uploadEffectPin.offsetLeft / uploadEffectLine.offsetWidth * 100);
 };
 uploadEffectPin.addEventListener('mouseup', setSaturation);
-//////////// 2.2 Конец: Загруженное фото - фильтры
-////// 2. Конец: галерея
+// ------------ 2.2 Конец: Загруженное фото - фильтры
+// ------ 2. Конец: галерея
 

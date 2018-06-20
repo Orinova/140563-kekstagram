@@ -112,20 +112,9 @@ var createPhotoElement = function (index, photo) {
 };
 
 // Заполянем блок на странице созданными DOM-элементами (превью фотографий)
-var fillPicturesList = function (photos) {
+var appendPictures = function (photos) {
   var fragment = document.createDocumentFragment();
   for (var i = 0; i < photos.length; i++) {
-    /*
-    Маше: По ТЗ "Все загруженные изображения показаны на главной странице в виде миниатюр",
-    значит я могу присваивать им идентификатор по мере вывода и быть уверенной, что
-    цифра в id на превью соответвует позиции в массиве объектов фотографий.
-
-    Мы с тобой обсуждали о том, что бы записать идентификатор в объект photos,
-    но в таком случае при удалении какой-нибудь из  фотографий
-    id перестал бы соответвовать номеру позиции в массиве и потребовалось бы написать больше проверок.
-
-    Ещё добавила префикс photo_ предположив,
-    что по мере работы у меня может появиться потребность в id для других объектов */
     fragment.appendChild(createPhotoElement('photo_' + i, photos[i]));
   }
   picturesSection.appendChild(fragment);
@@ -133,7 +122,7 @@ var fillPicturesList = function (photos) {
 
 // Покажите элемент .big-picture, удалив у него класс .hidden
 // и заполните его данными из созданного массива
-var showgallery = function (photo) {
+var showGallery = function (photo) {
   var commentsList = gallery.querySelector('.social__comments'); // список комментариев (ul)
   var socialComment = gallery.querySelector('.social__comment').cloneNode(true);
   socialComment.classList.add('social__comment--text'); // получили шаблон для комментрия (li)
@@ -160,7 +149,7 @@ var showgallery = function (photo) {
 };
 
 var photos = createContent(PHOTOS_COUNT);
-fillPicturesList(photos);
+appendPictures(photos);
 
 // ------ 1. Начало: Галерея
 var onPhotoClick = function (evt) {
@@ -168,7 +157,7 @@ var onPhotoClick = function (evt) {
   if (target.className === 'picture__img') {
     target = target.parentNode;
     var photoIndex = target.getAttribute('id').substr(6);
-    showgallery(photos[photoIndex]);
+    showGallery(photos[photoIndex]);
     openGallery();
   }
 };
@@ -292,3 +281,62 @@ var setSaturation = function () {
 };
 uploadEffectPin.addEventListener('mouseup', setSaturation);
 // ------ 2. Конец: галерея
+
+// ------ 3. Начало: валидация
+var uploadForm = uploadSection.querySelector('.img-upload__form');
+var uploadSubmit = uploadForm.querySelector('.img-upload__submit');
+var hashtagsInput = uploadForm.querySelector('.text__hashtags');
+
+
+var validateHashtags = function () {
+  var hashtags = hashtagsInput.value.trim(); //получили значение хэштега, очистили оконечные пробелы
+  hashtags = hashtags.toLowerCase(); // сброс регистра
+
+  if (hashtags !== '') { // если поле не пустое, то проверяем его
+    hashtags = hashtags.split(/\s+/); // для этого разобъем на массив
+    console.log(hashtags);
+    if (hashtags.length > 5) {
+      console.log('Нельзя указать больше пяти хэш-тегов');
+    }
+
+    for (var i = 0; i < hashtags.length; i++) {
+      console.log('Итерация №' + i + ': ' + hashtags[i]);
+
+      if (hashtags[i][0] !== '#') {
+        console.log('Хэш-тег должен начинаться с символа #');
+      }
+      if (hashtags[i].length > 20) {
+        console.log('Слишком длинный хэш-тег (максимум 20 символов)');
+      }
+      if (hashtags[i][0] === '#' && hashtags[i].length < 2) {
+        console.log('Пустой хэш-тег');
+      }
+      if (hashtags[i].substring(1).search('#') !== -1) {
+        console.log('Разделите хэш-теги пробелами');
+      }
+      if (checkDublicate(hashtags, i)) {
+        console.log('Хэш-теги не должны повторяться');
+      }
+    };
+  }
+};
+
+var checkDublicate = function (array, index) {
+    for (var i = 0; i < array.length; i++) {
+      if (array[index] === array[i] && index !== i) {
+        return true;
+      }
+  }
+  return false;
+};
+
+var onSubmitClick = function (evt) {
+  evt.preventDefault(); // прекращаем событие отправки
+  validateHashtags();
+  /*if (validateHashtags()) { // если валидация прислала тру, то отправляем
+    uploadForm.submit();
+  }*/
+};
+uploadSubmit.addEventListener('click', onSubmitClick);
+// ------ 2. Конец: валидация
+

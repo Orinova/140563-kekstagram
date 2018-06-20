@@ -282,61 +282,77 @@ var setSaturation = function () {
 uploadEffectPin.addEventListener('mouseup', setSaturation);
 // ------ 2. Конец: галерея
 
-// ------ 3. Начало: валидация
+
+// ------ 3. Начало: валидация - чистовик
 var uploadForm = uploadSection.querySelector('.img-upload__form');
 var uploadSubmit = uploadForm.querySelector('.img-upload__submit');
 var hashtagsInput = uploadForm.querySelector('.text__hashtags');
 
+var MAX_HASHTAGS = 5;
+var MAX_HASHTAG_LENGTH = 20;
+var hashtagsError = {
+  NO_SHARP: 'Хэш-тег должен начинается с символа # (решётка)',
+  EMPTY: 'Вы ввели пустой хэш-тег',
+  TOO_LONG: 'Длина хэш-тега не может превышать ' + MAX_HASHTAG_LENGTH + ' символов',
+  NO_SPACE: 'Разделите хэш-теги пробелами',
+  DUBLICATE: 'Хэш-теги не должны повторяться',
+  MAX_COUNT: 'Хэш-тегов не может быть более пяти'
+};
+
 
 var validateHashtags = function () {
-  var hashtags = hashtagsInput.value.trim(); //получили значение хэштега, очистили оконечные пробелы
+  var hashtags = hashtagsInput.value.trim(); // получили значение хэштега, очистили оконечные пробелы
   hashtags = hashtags.toLowerCase(); // сброс регистра
 
   if (hashtags !== '') { // если поле не пустое, то проверяем его
     hashtags = hashtags.split(/\s+/); // для этого разобъем на массив
-    console.log(hashtags);
-    if (hashtags.length > 5) {
-      console.log('Нельзя указать больше пяти хэш-тегов');
+
+    if (hashtags.length > MAX_HASHTAGS) {
+      hashtagsInput.setCustomValidity(hashtagsError.MAX_COUNT);
+      return false;
     }
-
     for (var i = 0; i < hashtags.length; i++) {
-      console.log('Итерация №' + i + ': ' + hashtags[i]);
-
       if (hashtags[i][0] !== '#') {
-        console.log('Хэш-тег должен начинаться с символа #');
+        hashtagsInput.setCustomValidity(hashtagsError.NO_SHARP);
+        return false;
       }
       if (hashtags[i].length > 20) {
-        console.log('Слишком длинный хэш-тег (максимум 20 символов)');
+        hashtagsInput.setCustomValidity(hashtagsError.TOO_LONG);
+        return false;
       }
       if (hashtags[i][0] === '#' && hashtags[i].length < 2) {
-        console.log('Пустой хэш-тег');
+        hashtagsInput.setCustomValidity(hashtagsError.EMPTY);
+        return false;
       }
       if (hashtags[i].substring(1).search('#') !== -1) {
-        console.log('Разделите хэш-теги пробелами');
+        hashtagsInput.setCustomValidity(hashtagsError.NO_SPACE);
+        return false;
       }
       if (checkDublicate(hashtags, i)) {
-        console.log('Хэш-теги не должны повторяться');
+        hashtagsInput.setCustomValidity(hashtagsError.DUBLICATE);
+        return false;
       }
-    };
+    }
   }
+  return true;
+};
+
+var clearErrorText = function () {
+  hashtagsInput.setCustomValidity('');
 };
 
 var checkDublicate = function (array, index) {
-    for (var i = 0; i < array.length; i++) {
-      if (array[index] === array[i] && index !== i) {
-        return true;
-      }
+  for (var i = 0; i < array.length; i++) {
+    if (array[index] === array[i] && index !== i) {
+      return true;
+    }
   }
   return false;
 };
 
-var onSubmitClick = function (evt) {
-  evt.preventDefault(); // прекращаем событие отправки
-  validateHashtags();
-  /*if (validateHashtags()) { // если валидация прислала тру, то отправляем
-    uploadForm.submit();
-  }*/
-};
-uploadSubmit.addEventListener('click', onSubmitClick);
-// ------ 2. Конец: валидация
+hashtagsInput.addEventListener('keyup', clearErrorText);
+uploadSubmit.addEventListener('click', validateHashtags);
+
+// СДЕЛАТЬ: Не закрывать аплоад-окно по эску, когда фокус на комментарии или хэштегах
+// ------ 3. Конец: валидация
 

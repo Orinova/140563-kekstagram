@@ -43,7 +43,7 @@
 
                   <fieldset class="img-upload__resize resize">
                     <button type="button" class="resize__control resize__control--minus">Уменьшить</button>
-                    <input type="text" class="resize__control resize__control--value" value="55%" title="Image Scale" name="scale" readonly>
+                    <input type="text" class="resize__control resize__control--value" value="100%" title="Image Scale" name="scale" readonly>
                     <button type="button" class="resize__control resize__control--plus">Увеличить</button>
                   </fieldset>
 
@@ -51,7 +51,7 @@
                     <img src="img/upload-default-image.jpg" alt="Предварительный просмотр фотографии">
                   </div>
 
-                  <fieldset class="img-upload__scale scale">
+                  <fieldset class="img-upload__scale scale hidden">
                     <input type="number" class="scale__value" name="effect-level" value="20">
                     <div class="scale__line">
                       <div class="scale__pin" tabindex="0">Кнопка изменения глубины эффекта фотографии</div>
@@ -65,7 +65,7 @@
                 <fieldset class="img-upload__effects effects">
                   <ul class="effects__list">
                     <li class="effects__item">
-                      <input type="radio" class="effects__radio visually-hidden" name="effect" id="effect-none" value="none">
+                      <input type="radio" class="effects__radio visually-hidden" name="effect" id="effect-none" value="none" checked>
                       <label for="effect-none" class="effects__label">
                         <span class="effects__preview effects__preview--none">Превью фото без эффекта</span>
                         Оригинал
@@ -100,7 +100,7 @@
                       </label>
                     </li>
                     <li class="effects__item">
-                      <input type="radio" class="effects__radio visually-hidden" name="effect" id="effect-heat" value="heat" checked>
+                      <input type="radio" class="effects__radio visually-hidden" name="effect" id="effect-heat" value="heat">
                       <label for="effect-heat" class="effects__label">
                         <span class="effects__preview effects__preview--heat">Превью эффекта Зной</span>
                         Зной

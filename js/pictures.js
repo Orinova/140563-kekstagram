@@ -33,6 +33,8 @@ var gallery = document.querySelector('.big-picture');
 var galleryCloseBtn = document.querySelector('.big-picture__cancel');
 
 var uploadSection = document.querySelector('.img-upload');
+var uploadForm = uploadSection.querySelector('.img-upload__form');
+var uploadSubmit = uploadForm.querySelector('.img-upload__submit');
 var uploadFile = uploadSection.querySelector('#upload-file');
 var uploadOverlay = uploadSection.querySelector('.img-upload__overlay');
 var uploadCloseBtn = uploadSection.querySelector('.img-upload__cancel');
@@ -56,6 +58,18 @@ var resizePlus = resizeControls.querySelector('.resize__control--plus');
 var resizeMinus = resizeControls.querySelector('.resize__control--minus');
 var resizeValue = resizeControls.querySelector('.resize__control--value');
 
+var MAX_HASHTAGS = 5;
+var MAX_HASHTAG_LENGTH = 20;
+var hashtagsError = {
+  NO_SHARP: 'Хэш-тег должен начинается с символа # (решётка)',
+  EMPTY: 'Вы ввели пустой хэш-тег',
+  TOO_LONG: 'Длина хэш-тега не может превышать ' + MAX_HASHTAG_LENGTH + ' символов',
+  NO_SPACE: 'Разделите хэш-теги пробелами',
+  DUBLICATE: 'Хэш-теги не должны повторяться',
+  MAX_COUNT: 'Хэш-тегов не может быть более пяти'
+};
+var hashtagsInput = uploadForm.querySelector('.text__hashtags');
+var descriptionInput = uploadForm.querySelector('.text__description');
 
 // Генератор случайных чисел
 var getRandomNum = function (min, max) {
@@ -173,7 +187,11 @@ var closeGallery = function () {
 };
 
 var galleryEscPress = function (evt) {
-  if (evt.keyCode === KEYCODE_ESC) {
+  /*
+    Тут не успела подумать как сделать запись короче...
+    И как избавиться от того, что функция galleryEscPress добавляет второй скролл (снимает класс modal-open),
+  */
+  if (evt.keyCode === KEYCODE_ESC && evt.target !== hashtagsInput && evt.target !== descriptionInput) {
     closeGallery();
   }
 };
@@ -196,10 +214,16 @@ var closeUpload = function () {
   uploadImgPreview.className = 'img-upload__preview';
   uploadImgPreview.style = '';
   setScale('reset');
+  hashtagsInput.value = '';
+  descriptionInput.value = '';
   uploadOverlay.classList.add('hidden');
 };
 var onUploadEscPress = function (evt) {
-  if (evt.keyCode === KEYCODE_ESC) {
+  /*
+    Тут не успела подумать как сделать запись короче...
+    И как избавиться от того, что функция galleryEscPress добавляет второй скролл (снимает класс modal-open),
+  */
+  if (evt.keyCode === KEYCODE_ESC && evt.target !== hashtagsInput && evt.target !== descriptionInput) {
     closeUpload();
   }
 };
@@ -283,23 +307,7 @@ uploadEffectPin.addEventListener('mouseup', setSaturation);
 // ------ 2. Конец: галерея
 
 
-// ------ 3. Начало: валидация - чистовик
-var uploadForm = uploadSection.querySelector('.img-upload__form');
-var uploadSubmit = uploadForm.querySelector('.img-upload__submit');
-var hashtagsInput = uploadForm.querySelector('.text__hashtags');
-
-var MAX_HASHTAGS = 5;
-var MAX_HASHTAG_LENGTH = 20;
-var hashtagsError = {
-  NO_SHARP: 'Хэш-тег должен начинается с символа # (решётка)',
-  EMPTY: 'Вы ввели пустой хэш-тег',
-  TOO_LONG: 'Длина хэш-тега не может превышать ' + MAX_HASHTAG_LENGTH + ' символов',
-  NO_SPACE: 'Разделите хэш-теги пробелами',
-  DUBLICATE: 'Хэш-теги не должны повторяться',
-  MAX_COUNT: 'Хэш-тегов не может быть более пяти'
-};
-
-
+// ------ 3. Начало: валидация
 var validateHashtags = function () {
   var hashtags = hashtagsInput.value.trim(); // получили значение хэштега, очистили оконечные пробелы
   hashtags = hashtags.toLowerCase(); // сброс регистра
@@ -326,6 +334,15 @@ var validateHashtags = function () {
       if (checkDublicate(hashtags, i)) {
         return hashtagsError.DUBLICATE;
       }
+
+      /*
+      Не смогла придумать как записать так, чтобы возвращаемые false не ломали мне код =)
+      return hashtags[i][0] !== '#' ? hashtagsError.NO_SHARP : false;
+      return hashtags[i].length > 20 ? hashtagsError.TOO_LONG : false;
+      return hashtags[i][0] === '#' && hashtags[i].length < 2 ? hashtagsError.EMPTY : false;
+      return hashtags[i].substring(1).search('#') !== -1 ? hashtagsError.NO_SPACE : false;
+      return checkDublicate(hashtags, i) ? hashtagsError.DUBLICATE : false;
+      */
     }
   }
   return false;
@@ -349,6 +366,7 @@ var onSubmitClick = function () {
   if (validateHashtags()) {
     var errorText = validateHashtags();
     hashtagsInput.setCustomValidity(errorText);
+    hashtagsInput.style.border = '2px red solid';
   }
   return false;
 };

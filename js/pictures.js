@@ -308,38 +308,33 @@ var validateHashtags = function () {
     hashtags = hashtags.split(/\s+/); // для этого разобъем на массив
 
     if (hashtags.length > MAX_HASHTAGS) {
-      hashtagsInput.setCustomValidity(hashtagsError.MAX_COUNT);
-      return false;
+      return hashtagsError.MAX_COUNT;
     }
     for (var i = 0; i < hashtags.length; i++) {
       if (hashtags[i][0] !== '#') {
-        hashtagsInput.setCustomValidity(hashtagsError.NO_SHARP);
-        return false;
+        return hashtagsError.NO_SHARP;
       }
       if (hashtags[i].length > 20) {
-        hashtagsInput.setCustomValidity(hashtagsError.TOO_LONG);
-        return false;
+        return hashtagsError.TOO_LONG;
       }
       if (hashtags[i][0] === '#' && hashtags[i].length < 2) {
-        hashtagsInput.setCustomValidity(hashtagsError.EMPTY);
-        return false;
+        return hashtagsError.EMPTY;
       }
       if (hashtags[i].substring(1).search('#') !== -1) {
-        hashtagsInput.setCustomValidity(hashtagsError.NO_SPACE);
-        return false;
+        return hashtagsError.NO_SPACE;
       }
       if (checkDublicate(hashtags, i)) {
-        hashtagsInput.setCustomValidity(hashtagsError.DUBLICATE);
-        return false;
+        return hashtagsError.DUBLICATE;
       }
     }
   }
-  return true;
+  return false;
 };
 
 var clearErrorText = function () {
   hashtagsInput.setCustomValidity('');
 };
+hashtagsInput.addEventListener('keyup', clearErrorText);
 
 var checkDublicate = function (array, index) {
   for (var i = 0; i < array.length; i++) {
@@ -350,8 +345,15 @@ var checkDublicate = function (array, index) {
   return false;
 };
 
-hashtagsInput.addEventListener('keyup', clearErrorText);
-uploadSubmit.addEventListener('click', validateHashtags);
+var onSubmitClick = function () {
+  if (validateHashtags()) {
+    var errorText = validateHashtags();
+    hashtagsInput.setCustomValidity(errorText);
+  }
+  return false;
+};
+uploadSubmit.addEventListener('click', onSubmitClick);
+
 
 // СДЕЛАТЬ: Не закрывать аплоад-окно по эску, когда фокус на комментарии или хэштегах
 // ------ 3. Конец: валидация

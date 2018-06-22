@@ -34,7 +34,6 @@ var galleryCloseBtn = document.querySelector('.big-picture__cancel');
 
 var uploadSection = document.querySelector('.img-upload');
 var uploadForm = uploadSection.querySelector('.img-upload__form');
-var uploadSubmit = uploadForm.querySelector('.img-upload__submit');
 var uploadFile = uploadSection.querySelector('#upload-file');
 var uploadOverlay = uploadSection.querySelector('.img-upload__overlay');
 var uploadCloseBtn = uploadSection.querySelector('.img-upload__cancel');
@@ -60,7 +59,7 @@ var resizeValue = resizeControls.querySelector('.resize__control--value');
 
 var MAX_HASHTAGS = 5;
 var MAX_HASHTAG_LENGTH = 20;
-var hashtagsError = {
+var errors = {
   NO_SHARP: 'Хэш-тег должен начинается с символа # (решётка)',
   EMPTY: 'Вы ввели пустой хэш-тег',
   TOO_LONG: 'Длина хэш-тега не может превышать ' + MAX_HASHTAG_LENGTH + ' символов',
@@ -70,6 +69,7 @@ var hashtagsError = {
 };
 var hashtagsInput = uploadForm.querySelector('.text__hashtags');
 var descriptionInput = uploadForm.querySelector('.text__description');
+var hashtagsError = uploadForm.querySelector('.text__error');
 
 // Генератор случайных чисел
 var getRandomNum = function (min, max) {
@@ -308,51 +308,6 @@ uploadEffectPin.addEventListener('mouseup', setSaturation);
 
 
 // ------ 3. Начало: валидация
-var validateHashtags = function () {
-  var hashtags = hashtagsInput.value.trim(); // получили значение хэштега, очистили оконечные пробелы
-  hashtags = hashtags.toLowerCase(); // сброс регистра
-
-  if (hashtags !== '') { // если поле не пустое, то проверяем его
-    hashtags = hashtags.split(/\s+/); // для этого разобъем на массив
-
-    if (hashtags.length > MAX_HASHTAGS) {
-      return hashtagsError.MAX_COUNT;
-    }
-    for (var i = 0; i < hashtags.length; i++) {
-      if (hashtags[i][0] !== '#') {
-        return hashtagsError.NO_SHARP;
-      }
-      if (hashtags[i].length > 20) {
-        return hashtagsError.TOO_LONG;
-      }
-      if (hashtags[i][0] === '#' && hashtags[i].length < 2) {
-        return hashtagsError.EMPTY;
-      }
-      if (hashtags[i].substring(1).search('#') !== -1) {
-        return hashtagsError.NO_SPACE;
-      }
-      if (checkDublicate(hashtags, i)) {
-        return hashtagsError.DUBLICATE;
-      }
-
-      /*
-      Не смогла придумать как записать так, чтобы возвращаемые false не ломали мне код =)
-      return hashtags[i][0] !== '#' ? hashtagsError.NO_SHARP : false;
-      return hashtags[i].length > 20 ? hashtagsError.TOO_LONG : false;
-      return hashtags[i][0] === '#' && hashtags[i].length < 2 ? hashtagsError.EMPTY : false;
-      return hashtags[i].substring(1).search('#') !== -1 ? hashtagsError.NO_SPACE : false;
-      return checkDublicate(hashtags, i) ? hashtagsError.DUBLICATE : false;
-      */
-    }
-  }
-  return false;
-};
-
-var clearErrorText = function () {
-  hashtagsInput.setCustomValidity('');
-};
-hashtagsInput.addEventListener('keyup', clearErrorText);
-
 var checkDublicate = function (array, index) {
   for (var i = 0; i < array.length; i++) {
     if (array[index] === array[i] && index !== i) {
@@ -361,18 +316,46 @@ var checkDublicate = function (array, index) {
   }
   return false;
 };
-
-var onSubmitClick = function () {
-  if (validateHashtags()) {
-    var errorText = validateHashtags();
-    hashtagsInput.setCustomValidity(errorText);
-    hashtagsInput.style.border = '2px red solid';
+var setDisplayError = function (errorText) {
+  if (hashtagsInput.validity.valid) {
+    hashtagsError.classList.remove('text__error--show');
+  } else {
+    hashtagsError.textContent = errorText;
+    hashtagsError.classList.add('text__error--show');
   }
-  return false;
 };
-uploadSubmit.addEventListener('click', onSubmitClick);
 
+var validateHashtags = function () {
+  var hashtags = hashtagsInput.value.trim(); // получили значение хэштега, очистили оконечные пробелы
+  hashtags = hashtags.toLowerCase(); // сброс регистра
+  var errorText = '';
 
-// СДЕЛАТЬ: Не закрывать аплоад-окно по эску, когда фокус на комментарии или хэштегах
+  if (hashtags !== '') { // если поле не пустое, то проверяем его
+    hashtags = hashtags.split(/\s+/); // для этого разобъем на массив
+    if (hashtags.length > MAX_HASHTAGS) {
+      errorText = errors.MAX_COUNT;
+    }
+
+    for (var i = 0; i < hashtags.length; i++) {
+      if (hashtags[i][0] !== '#') {
+        errorText = errors.NO_SHARP;
+      }
+      if (hashtags[i].length > 20) {
+        errorText = errors.TOO_LONG;
+      }
+      if (hashtags[i][0] === '#' && hashtags[i].length < 2) {
+        errorText = errors.EMPTY;
+      }
+      if (hashtags[i].substring(1).search('#') !== -1) {
+        errorText = errors.NO_SPACE;
+      }
+      if (checkDublicate(hashtags, i)) {
+        errorText = errors.DUBLICATE;
+      }
+    }
+    hashtagsInput.setCustomValidity(errorText);
+    setDisplayError(errorText);
+  }
+};
+hashtagsInput.addEventListener('keyup', validateHashtags);
 // ------ 3. Конец: валидация
-

@@ -311,20 +311,21 @@ var setSaturation = function () {
 
 function getCoordX(elem) {
   var box = elem.getBoundingClientRect();
-  return  box.left + pageXOffset;
+  return box.left + pageXOffset;
 }
 
 uploadEffectPin.addEventListener('mousedown', function (evt) {
-    evt.preventDefault();
-    var start = evt.clientX;
-    var maxOffset = uploadEffectLine.offsetWidth;
-    var minOffset = getCoords(uploadEffectLevel);
+  evt.preventDefault();
+  var start = evt.clientX;
+  var maxOffset = uploadEffectLine.offsetWidth;
+  var minOffset = getCoordX(uploadEffectLevel);
 
-    var onMouseMove = function (moveEvt) {
+  var onMouseMove = function (moveEvt) {
     moveEvt.preventDefault();
-
-    if (moveEvt.clientX <= minOffset || moveEvt.clientX >= minOffset + maxOffset) return; // при выходе указателя за пределы шкалы
-
+    if (moveEvt.clientX <= minOffset || moveEvt.clientX >= minOffset + maxOffset) {
+      // при выходе указателя за пределы шкалы выходим из функции
+      return;
+    }
     var shift = start - moveEvt.clientX;
     start = moveEvt.clientX;
     var pinShift = uploadEffectPin.offsetLeft - shift;

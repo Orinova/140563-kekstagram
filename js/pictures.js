@@ -49,8 +49,9 @@ var DEFAULT_EFFECT_VALUE = 100;
 var uploadEffectScale = uploadSection.querySelector('.scale');
 var uploadEffectsList = uploadSection.querySelector('.effects__list');
 var uploadEffectValue = uploadSection.querySelector('.scale__value').value;
-var uploadEffectPin = uploadSection.querySelector('.scale__pin');
 var uploadEffectLine = uploadSection.querySelector('.scale__line');
+var uploadEffectLevel = uploadSection.querySelector('.scale__level');
+var uploadEffectPin = uploadSection.querySelector('.scale__pin');
 
 var resizeControls = uploadSection.querySelector('.resize');
 var resizePlus = resizeControls.querySelector('.resize__control--plus');
@@ -170,8 +171,8 @@ var onPhotoClick = function (evt) {
   var target = evt.target;
   if (target.className === 'picture__img') {
     target = target.parentNode;
-    var photoIndex = target.getAttribute('id').substr(6);
-    showGallery(photos[photoIndex]);
+    var index = target.getAttribute('id').substr(6);
+    showGallery(photos[index]);
     openGallery();
   }
 };
@@ -253,7 +254,7 @@ resizeMinus.addEventListener('click', function () {
   setScale('minus');
 });
 
-// ------------ Фильтры
+// ------------ Добавление фильтра на фото
 var effects = {
   chrome: function () {
     return 'grayscale(' + uploadEffectValue / 100 + ')';
@@ -296,6 +297,8 @@ var setCurrentEffect = function (evt) {
 };
 uploadEffectsList.addEventListener('click', setCurrentEffect);
 
+
+// ------------ Насыщенность фильтра
 var getSaturationLevel = function () {
   return Math.round(uploadEffectPin.offsetLeft / uploadEffectLine.offsetWidth * 100);
 };
@@ -303,7 +306,44 @@ var setSaturation = function () {
   uploadEffectValue = getSaturationLevel();
   uploadImgPreview.style.filter = effects[currentEffect]();
 };
-uploadEffectPin.addEventListener('mouseup', setSaturation);
+
+// ------------ Перетаскивание пина
+
+function getCoordX(elem) {
+  var box = elem.getBoundingClientRect();
+  return  box.left + pageXOffset;
+}
+
+uploadEffectPin.addEventListener('mousedown', function (evt) {
+    evt.preventDefault();
+    var start = evt.clientX;
+    var maxOffset = uploadEffectLine.offsetWidth;
+    var minOffset = getCoords(uploadEffectLevel);
+
+    var onMouseMove = function (moveEvt) {
+    moveEvt.preventDefault();
+
+    if (moveEvt.clientX <= minOffset || moveEvt.clientX >= minOffset + maxOffset) return; // при выходе указателя за пределы шкалы
+
+    var shift = start - moveEvt.clientX;
+    start = moveEvt.clientX;
+    var pinShift = uploadEffectPin.offsetLeft - shift;
+    if (pinShift >= 0 && pinShift <= maxOffset) {
+      uploadEffectPin.style.left = pinShift + 'px';
+      uploadEffectLevel.style.width = pinShift + 'px';
+      setSaturation();
+    }
+  };
+
+  var onMouseUp = function (upEvt) {
+    upEvt.preventDefault();
+    document.removeEventListener('mousemove', onMouseMove);
+    document.removeEventListener('mouseup', onMouseUp);
+  };
+
+  document.addEventListener('mousemove', onMouseMove);
+  document.addEventListener('mouseup', onMouseUp);
+});
 // ------ 2. Конец: галерея
 
 

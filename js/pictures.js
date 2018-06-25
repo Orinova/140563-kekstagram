@@ -48,7 +48,7 @@ var scale = {
 var DEFAULT_EFFECT_VALUE = 100;
 var uploadEffectScale = uploadSection.querySelector('.scale');
 var uploadEffectsList = uploadSection.querySelector('.effects__list');
-var uploadEffectValue = uploadSection.querySelector('.scale__value').value;
+var uploadEffectSaturation = uploadSection.querySelector('.scale__value');
 var uploadEffectLine = uploadSection.querySelector('.scale__line');
 var uploadEffectLevel = uploadSection.querySelector('.scale__level');
 var uploadEffectPin = uploadSection.querySelector('.scale__pin');
@@ -257,19 +257,19 @@ resizeMinus.addEventListener('click', function () {
 // ------------ Добавление фильтра на фото
 var effects = {
   chrome: function () {
-    return 'grayscale(' + uploadEffectValue / 100 + ')';
+    return 'grayscale(' + uploadEffectSaturation.value / 100 + ')';
   },
   sepia: function () {
-    return 'sepia(' + uploadEffectValue / 100 + ')';
+    return 'sepia(' + uploadEffectSaturation.value / 100 + ')';
   },
   marvin: function () {
-    return 'invert(' + uploadEffectValue + '%)';
+    return 'invert(' + uploadEffectSaturation.value + '%)';
   },
   phobos: function () {
-    return 'blur(' + uploadEffectValue * 3 / 100 + 'px)';
+    return 'blur(' + uploadEffectSaturation.value * 3 / 100 + 'px)';
   },
   heat: function () {
-    return 'brightness(' + (uploadEffectValue * 2 / 100 + 1) + ')';
+    return 'brightness(' + (uploadEffectSaturation.value * 2 / 100 + 1) + ')';
   },
   none: function () {
     return '';
@@ -291,7 +291,7 @@ var setCurrentEffect = function (evt) {
     }
 
     // Накладываем фильтр
-    uploadEffectValue = DEFAULT_EFFECT_VALUE; // указываем стартовый уровень
+    uploadEffectSaturation.setAttribute('value', DEFAULT_EFFECT_VALUE);// указываем стартовый уровень
     uploadImgPreview.style.filter = effects[currentEffect](); // выводим фильтр
   }
 };
@@ -303,7 +303,7 @@ var getSaturationLevel = function () {
   return Math.round(uploadEffectPin.offsetLeft / uploadEffectLine.offsetWidth * 100);
 };
 var setSaturation = function () {
-  uploadEffectValue = getSaturationLevel();
+  uploadEffectSaturation.setAttribute('value', getSaturationLevel());
   uploadImgPreview.style.filter = effects[currentEffect]();
 };
 

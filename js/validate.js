@@ -71,4 +71,14 @@
     return false;
   };
   uploadSubmit.addEventListener('click', onSubmitClick);
+
+  var clearInputs = function () {
+    clearErrorText();
+    hashtagsInput.value = '';
+    descriptionInput.value = '';
+  };
+
+  window.validate = {
+    clear: clearInputs
+  };
 })();

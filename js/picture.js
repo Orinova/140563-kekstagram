@@ -1,6 +1,10 @@
 'use strict';
 
 (function () {
+  var picturesSection = document.querySelector('.pictures');
+  // Маша, у меня этот селектор повторяется в gallery.js
+  // Есть идеи как укомплектовать чтобы не повторялось?
+
   // Создаем DOM элементы для переданного массива фотографий
   var createPhotoElement = function (index, photo) {
     var photoElement = document.querySelector('#picture').content.cloneNode(true);

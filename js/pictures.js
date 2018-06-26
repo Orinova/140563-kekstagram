@@ -208,6 +208,7 @@ var closeUpload = function () {
   uploadImgPreview.className = 'img-upload__preview';
   uploadImgPreview.style = '';
   setScale('reset');
+  effectScale.classList.add('hidden');
   hashtagsInput.value = '';
   descriptionInput.value = '';
   uploadOverlay.classList.add('hidden');
@@ -257,15 +258,6 @@ var effectPin = uploadSection.querySelector('.scale__pin');
 var effectLevel = uploadSection.querySelector('.scale__level');
 var effectSaturation = uploadSection.querySelector('.scale__value');
 
-var getCurrentEffect = function () {
-  return effectsList.querySelector('.effects__radio:checked').value;
-};
-effectsList.addEventListener('click', getCurrentEffect);
-
-var getSaturation = function () {
-  return Math.round(effectPin.offsetLeft / effectLine.offsetWidth * 100);
-};
-
 var setEffect = function (effect, level) {
   var result;
   switch (effect) {
@@ -291,24 +283,37 @@ var setEffect = function (effect, level) {
   effectSaturation.setAttribute('value', level);
 };
 
-var switchEffect = function () {
-  var effect = getCurrentEffect();
-  uploadImgPreview.className = 'img-upload__preview'; // сброс ранее выбранного класса
-  uploadImgPreview.classList.add('effects__preview--' + effect); // добавляем новый класс фильтра
-  setEffect(effect, DEFAULT_EFFECT_VALUE); // устаналиваем фильтр и его глубину в стартовом значении
-  effectPin.style.left = effectLine.offsetWidth + 'px'; // пин на 100%
-  effectLevel.style.width = effectLine.offsetWidth + 'px'; // полоску уровеня на 100%
-  // проверяем нужен ли слайдер
-  if (effect === 'none') {
-    effectScale.classList.add('hidden');
-  } else {
-    effectScale.classList.remove('hidden');
+var switchEffect = function (evt) {
+  var target = evt.target;
+  if (target.tagName === 'INPUT') {
+    var effectName = target.value;
+    uploadImgPreview.className = 'img-upload__preview'; // сброс ранее выбранного класса
+    uploadImgPreview.classList.add('effects__preview--' + effectName); // добавляем новый класс фильтра
+
+    // проверяем нужен ли слайдер
+    if (effectName === 'none') {
+      effectScale.classList.add('hidden');
+    } else {
+      effectScale.classList.remove('hidden');
+      setEffect(effectName, DEFAULT_EFFECT_VALUE); // устаналиваем фильтр и его глубину в стартовом значении
+      effectPin.style.left = effectLine.offsetWidth + 'px'; // пин на 100%
+      effectLevel.style.width = effectLine.offsetWidth + 'px'; // полоску уровеня на 100%
+    }
   }
 };
-effectsList.addEventListener('click', switchEffect);
+effectsList.addEventListener('click', function (evt) {
+  switchEffect(evt);
+});
 
-// ------------ Перетаскивание пина
+// ------------ Перетаскивание пина и управление насыщенностью
 
+var getCurrentEffect = function () {
+  return effectsList.querySelector('.effects__radio:checked').value;
+};
+effectsList.addEventListener('click', getCurrentEffect);
+var getSaturation = function () {
+  return Math.round(effectPin.offsetLeft / effectLine.offsetWidth * 100);
+};
 function getCoordX(elem) {
   var box = elem.getBoundingClientRect();
   return box.left + pageXOffset;

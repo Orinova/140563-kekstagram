@@ -64,7 +64,6 @@ var errors = {
 };
 var hashtagsInput = uploadForm.querySelector('.text__hashtags');
 var descriptionInput = uploadForm.querySelector('.text__description');
-var hashtagsError = uploadForm.querySelector('.text__error');
 
 // Генератор случайных чисел
 var getRandomNum = function (min, max) {
@@ -258,57 +257,55 @@ var effectPin = uploadSection.querySelector('.scale__pin');
 var effectLevel = uploadSection.querySelector('.scale__level');
 var effectSaturation = uploadSection.querySelector('.scale__value');
 
-
-var effects = {
-  chrome: 'grayscale(' + effectSaturation.value / 100 + ')',
-  sepia: 'sepia(' + effectSaturation.value / 100 + ')',
-  marvin: 'invert(' + effectSaturation.value + '%)',
-  phobos: 'blur(' + effectSaturation.value * 3 / 100 + 'px)',
-  heat: 'brightness(' + (effectSaturation.value * 2 / 100 + 1) + ')',
-  none: ''
+var getCurrentEffect = function () {
+  return effectsList.querySelector('.effects__radio:checked').value;
 };
+effectsList.addEventListener('click', getCurrentEffect);
 
-var currentEffect;
-var setCurrentEffect = function (evt) {
-  if (evt.target.tagName === 'INPUT') {
-    currentEffect = evt.target.value; // узнаем по какому фильтру кликнули
-
-    uploadImgPreview.className = 'img-upload__preview'; // сбрасываем стиль (очищаем ранее выбранный)
-    uploadImgPreview.classList.add('effects__preview--' + currentEffect); //потом добавляем класс фильтра
-
-    // Накладываем фильтр
-    effectSaturation.setAttribute('value', DEFAULT_EFFECT_VALUE);// указываем значение стартовой насыщенности
-    // ЗАМЕТКА: здесь вернуть пин к дефолтному значению
-    uploadImgPreview.style.filter = effects[currentEffect]; // выводим фильтр
-
-    // проверяем на необходимость слайдера
-    if (currentEffect === 'none') {
-      effectScale.classList.add('hidden');
-    } else {
-      effectScale.classList.remove('hidden');
-    }
-  }
-};
-effectsList.addEventListener('click', setCurrentEffect);
-
-
-// ------------ Насыщенность фильтра
-var getSaturationLevel = function () {
+var getSaturation = function () {
   return Math.round(effectPin.offsetLeft / effectLine.offsetWidth * 100);
 };
 
-var setSaturation = function () {
-  effectSaturation.setAttribute('value', getSaturationLevel());
-  var effects = {
-    chrome: 'grayscale(' + effectSaturation.value / 100 + ')',
-    sepia: 'sepia(' + effectSaturation.value / 100 + ')',
-    marvin: 'invert(' + effectSaturation.value + '%)',
-    phobos: 'blur(' + effectSaturation.value * 3 / 100 + 'px)',
-    heat: 'brightness(' + (effectSaturation.value * 2 / 100 + 1) + ')',
-    none: ''
-  };
-  uploadImgPreview.style.filter = effects[currentEffect];
+var setEffect = function (effect, level) {
+  var result;
+  switch (effect) {
+    case 'chrome':
+      result = 'grayscale(' + level / 100 + ')';
+      break;
+    case 'sepia':
+      result = 'sepia(' + level / 100 + ')';
+      break;
+    case 'marvin':
+      result = 'invert(' + level + '%)';
+      break;
+    case 'phobos':
+      result = 'blur(' + level * 3 / 100 + 'px)';
+      break;
+    case 'heat':
+      result = 'brightness(' + (level * 2 / 100 + 1) + ')';
+      break;
+    default: result = 'none';
+      break;
+  }
+  uploadImgPreview.style.filter = result;
+  effectSaturation.setAttribute('value', level);
 };
+
+var switchEffect = function () {
+  var effect = getCurrentEffect();
+  uploadImgPreview.className = 'img-upload__preview'; // сброс ранее выбранного класса
+  uploadImgPreview.classList.add('effects__preview--' + effect); // добавляем новый класс фильтра
+  setEffect(effect, DEFAULT_EFFECT_VALUE); // устаналиваем фильтр и его глубину в стартовом значении
+  effectPin.style.left = effectLine.offsetWidth + 'px'; // пин на 100%
+  effectLevel.style.width = effectLine.offsetWidth + 'px'; // полоску уровеня на 100%
+  // проверяем нужен ли слайдер
+  if (effect === 'none') {
+    effectScale.classList.add('hidden');
+  } else {
+    effectScale.classList.remove('hidden');
+  }
+};
+effectsList.addEventListener('click', switchEffect);
 
 // ------------ Перетаскивание пина
 
@@ -335,7 +332,7 @@ effectPin.addEventListener('mousedown', function (evt) {
     if (pinShift >= 0 && pinShift <= maxOffset) {
       effectPin.style.left = pinShift + 'px';
       effectLevel.style.width = pinShift + 'px';
-      setSaturation();
+      setEffect(getCurrentEffect(), getSaturation());
     }
   };
 

@@ -852,9 +852,12 @@ main {
   color: #000000;
 
   border-radius: 5px;
-  resize: none;
 }
 
+.text__hashtags:not(:focus):invalid,
+.text__description:not(:focus):invalid {
+ border: 2px solid red;
+}
 
 /* Кнопка отправки формы */
 

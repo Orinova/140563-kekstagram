@@ -34,11 +34,12 @@ var galleryCloseBtn = document.querySelector('.big-picture__cancel');
 
 var uploadSection = document.querySelector('.img-upload');
 var uploadForm = uploadSection.querySelector('.img-upload__form');
-var uploadSubmit = uploadForm.querySelector('.img-upload__submit');
+var uploadSubmit = uploadSection.querySelector('.img-upload__submit');
 var uploadFile = uploadSection.querySelector('#upload-file');
 var uploadOverlay = uploadSection.querySelector('.img-upload__overlay');
 var uploadCloseBtn = uploadSection.querySelector('.img-upload__cancel');
 var uploadImgPreview = uploadSection.querySelector('.img-upload__preview');
+
 
 var scale = {
   RANGE: 25,
@@ -46,13 +47,6 @@ var scale = {
   MAX: 100,
   DEFAULT: 100
 };
-var DEFAULT_EFFECT_VALUE = 100;
-var uploadEffectScale = uploadSection.querySelector('.scale');
-var uploadEffectsList = uploadSection.querySelector('.effects__list');
-var uploadEffectValue = uploadSection.querySelector('.scale__value').value;
-var uploadEffectPin = uploadSection.querySelector('.scale__pin');
-var uploadEffectLine = uploadSection.querySelector('.scale__line');
-
 var resizeControls = uploadSection.querySelector('.resize');
 var resizePlus = resizeControls.querySelector('.resize__control--plus');
 var resizeMinus = resizeControls.querySelector('.resize__control--minus');
@@ -60,7 +54,7 @@ var resizeValue = resizeControls.querySelector('.resize__control--value');
 
 var MAX_HASHTAGS = 5;
 var MAX_HASHTAG_LENGTH = 20;
-var hashtagsError = {
+var errors = {
   NO_SHARP: 'Хэш-тег должен начинается с символа # (решётка)',
   EMPTY: 'Вы ввели пустой хэш-тег',
   TOO_LONG: 'Длина хэш-тега не может превышать ' + MAX_HASHTAG_LENGTH + ' символов',
@@ -170,8 +164,8 @@ var onPhotoClick = function (evt) {
   var target = evt.target;
   if (target.className === 'picture__img') {
     target = target.parentNode;
-    var photoIndex = target.getAttribute('id').substr(6);
-    showGallery(photos[photoIndex]);
+    var index = target.getAttribute('id').substr(6);
+    showGallery(photos[index]);
     openGallery();
   }
 };
@@ -214,6 +208,7 @@ var closeUpload = function () {
   uploadImgPreview.className = 'img-upload__preview';
   uploadImgPreview.style = '';
   setScale('reset');
+  effectScale.classList.add('hidden');
   hashtagsInput.value = '';
   descriptionInput.value = '';
   uploadOverlay.classList.add('hidden');
@@ -253,106 +248,112 @@ resizeMinus.addEventListener('click', function () {
   setScale('minus');
 });
 
-// ------------ Фильтры
-var effects = {
-  chrome: function () {
-    return 'grayscale(' + uploadEffectValue / 100 + ')';
-  },
-  sepia: function () {
-    return 'sepia(' + uploadEffectValue / 100 + ')';
-  },
-  marvin: function () {
-    return 'invert(' + uploadEffectValue + '%)';
-  },
-  phobos: function () {
-    return 'blur(' + uploadEffectValue * 3 / 100 + 'px)';
-  },
-  heat: function () {
-    return 'brightness(' + (uploadEffectValue * 2 / 100 + 1) + ')';
-  },
-  none: function () {
-    return '';
-  }
-};
-var currentEffect;
-var setCurrentEffect = function (evt) {
-  if (evt.target.tagName === 'INPUT') {
-    currentEffect = evt.target.value;
-    // сбрасываем стили, потом добавляем класс фильтры
-    uploadImgPreview.className = 'img-upload__preview';
-    uploadImgPreview.classList.add('effects__preview--' + currentEffect);
+// ------------ Добавление фильтра на фото
 
-    // проверяем на необходимость слайдера
-    if (currentEffect === 'none') {
-      uploadEffectScale.classList.add('hidden');
+var DEFAULT_EFFECT_VALUE = 100;
+var effectScale = uploadSection.querySelector('.scale');
+var effectsList = uploadSection.querySelector('.effects__list');
+var effectLine = uploadSection.querySelector('.scale__line');
+var effectPin = uploadSection.querySelector('.scale__pin');
+var effectLevel = uploadSection.querySelector('.scale__level');
+var effectSaturation = uploadSection.querySelector('.scale__value');
+
+var setEffect = function (effect, level) {
+  var result;
+  switch (effect) {
+    case 'chrome':
+      result = 'grayscale(' + level / 100 + ')';
+      break;
+    case 'sepia':
+      result = 'sepia(' + level / 100 + ')';
+      break;
+    case 'marvin':
+      result = 'invert(' + level + '%)';
+      break;
+    case 'phobos':
+      result = 'blur(' + level * 3 / 100 + 'px)';
+      break;
+    case 'heat':
+      result = 'brightness(' + (level * 2 / 100 + 1) + ')';
+      break;
+    default: result = 'none';
+      break;
+  }
+  uploadImgPreview.style.filter = result;
+  effectSaturation.setAttribute('value', level);
+};
+
+var switchEffect = function (evt) {
+  var target = evt.target;
+  if (target.tagName === 'INPUT') {
+    var effectName = target.value;
+    uploadImgPreview.className = 'img-upload__preview'; // сброс ранее выбранного класса
+    uploadImgPreview.classList.add('effects__preview--' + effectName); // добавляем новый класс фильтра
+
+    // проверяем нужен ли слайдер
+    if (effectName === 'none') {
+      effectScale.classList.add('hidden');
     } else {
-      uploadEffectScale.classList.remove('hidden');
+      effectScale.classList.remove('hidden');
+      setEffect(effectName, DEFAULT_EFFECT_VALUE); // устаналиваем фильтр и его глубину в стартовом значении
+      effectPin.style.left = effectLine.offsetWidth + 'px'; // пин на 100%
+      effectLevel.style.width = effectLine.offsetWidth + 'px'; // полоску уровеня на 100%
     }
-
-    // Накладываем фильтр
-    uploadEffectValue = DEFAULT_EFFECT_VALUE; // указываем стартовый уровень
-    uploadImgPreview.style.filter = effects[currentEffect](); // выводим фильтр
   }
 };
-uploadEffectsList.addEventListener('click', setCurrentEffect);
+effectsList.addEventListener('click', function (evt) {
+  switchEffect(evt);
+});
 
-var getSaturationLevel = function () {
-  return Math.round(uploadEffectPin.offsetLeft / uploadEffectLine.offsetWidth * 100);
+// ------------ Перетаскивание пина и управление насыщенностью
+
+var getCurrentEffect = function () {
+  return effectsList.querySelector('.effects__radio:checked').value;
 };
-var setSaturation = function () {
-  uploadEffectValue = getSaturationLevel();
-  uploadImgPreview.style.filter = effects[currentEffect]();
+effectsList.addEventListener('click', getCurrentEffect);
+var getSaturation = function () {
+  return Math.round(effectPin.offsetLeft / effectLine.offsetWidth * 100);
 };
-uploadEffectPin.addEventListener('mouseup', setSaturation);
+function getCoordX(elem) {
+  var box = elem.getBoundingClientRect();
+  return box.left + pageXOffset;
+}
+
+effectPin.addEventListener('mousedown', function (evt) {
+  evt.preventDefault();
+  var start = evt.clientX;
+  var maxOffset = effectLine.offsetWidth;
+  var minOffset = getCoordX(effectLevel);
+
+  var onMouseMove = function (moveEvt) {
+    moveEvt.preventDefault();
+    if (moveEvt.clientX <= minOffset || moveEvt.clientX >= minOffset + maxOffset) {
+      // при выходе указателя за пределы шкалы выходим из функции
+      return;
+    }
+    var shift = start - moveEvt.clientX;
+    start = moveEvt.clientX;
+    var pinShift = effectPin.offsetLeft - shift;
+    if (pinShift >= 0 && pinShift <= maxOffset) {
+      effectPin.style.left = pinShift + 'px';
+      effectLevel.style.width = pinShift + 'px';
+      setEffect(getCurrentEffect(), getSaturation());
+    }
+  };
+
+  var onMouseUp = function (upEvt) {
+    upEvt.preventDefault();
+    document.removeEventListener('mousemove', onMouseMove);
+    document.removeEventListener('mouseup', onMouseUp);
+  };
+
+  document.addEventListener('mousemove', onMouseMove);
+  document.addEventListener('mouseup', onMouseUp);
+});
 // ------ 2. Конец: галерея
 
 
 // ------ 3. Начало: валидация
-var validateHashtags = function () {
-  var hashtags = hashtagsInput.value.trim(); // получили значение хэштега, очистили оконечные пробелы
-  hashtags = hashtags.toLowerCase(); // сброс регистра
-
-  if (hashtags !== '') { // если поле не пустое, то проверяем его
-    hashtags = hashtags.split(/\s+/); // для этого разобъем на массив
-
-    if (hashtags.length > MAX_HASHTAGS) {
-      return hashtagsError.MAX_COUNT;
-    }
-    for (var i = 0; i < hashtags.length; i++) {
-      if (hashtags[i][0] !== '#') {
-        return hashtagsError.NO_SHARP;
-      }
-      if (hashtags[i].length > 20) {
-        return hashtagsError.TOO_LONG;
-      }
-      if (hashtags[i][0] === '#' && hashtags[i].length < 2) {
-        return hashtagsError.EMPTY;
-      }
-      if (hashtags[i].substring(1).search('#') !== -1) {
-        return hashtagsError.NO_SPACE;
-      }
-      if (checkDublicate(hashtags, i)) {
-        return hashtagsError.DUBLICATE;
-      }
-
-      /*
-      Не смогла придумать как записать так, чтобы возвращаемые false не ломали мне код =)
-      return hashtags[i][0] !== '#' ? hashtagsError.NO_SHARP : false;
-      return hashtags[i].length > 20 ? hashtagsError.TOO_LONG : false;
-      return hashtags[i][0] === '#' && hashtags[i].length < 2 ? hashtagsError.EMPTY : false;
-      return hashtags[i].substring(1).search('#') !== -1 ? hashtagsError.NO_SPACE : false;
-      return checkDublicate(hashtags, i) ? hashtagsError.DUBLICATE : false;
-      */
-    }
-  }
-  return false;
-};
-
-var clearErrorText = function () {
-  hashtagsInput.setCustomValidity('');
-};
-hashtagsInput.addEventListener('keyup', clearErrorText);
-
 var checkDublicate = function (array, index) {
   for (var i = 0; i < array.length; i++) {
     if (array[index] === array[i] && index !== i) {
@@ -362,17 +363,51 @@ var checkDublicate = function (array, index) {
   return false;
 };
 
+var validateHashtags = function () {
+  var hashtags = hashtagsInput.value.trim(); // получили значение хэштега, очистили оконечные пробелы
+  hashtags = hashtags.toLowerCase(); // сброс регистра
+  var errorText = '';
+
+  if (hashtags !== '') { // если поле не пустое, то проверяем его
+    hashtags = hashtags.split(/\s+/); // для этого разобъем на массив
+    if (hashtags.length > MAX_HASHTAGS) {
+      errorText = errors.MAX_COUNT;
+    }
+
+    for (var i = 0; i < hashtags.length; i++) {
+      if (hashtags[i][0] !== '#') {
+        errorText = errors.NO_SHARP;
+      }
+      if (hashtags[i].length > 20) {
+        errorText = errors.TOO_LONG;
+      }
+      if (hashtags[i][0] === '#' && hashtags[i].length < 2) {
+        errorText = errors.EMPTY;
+      }
+      if (hashtags[i].substring(1).search('#') !== -1) {
+        errorText = errors.NO_SPACE;
+      }
+      if (checkDublicate(hashtags, i)) {
+        errorText = errors.DUBLICATE;
+      }
+    }
+    hashtagsInput.setCustomValidity(errorText);
+  }
+};
+
+var clearErrorText = function () {
+  hashtagsInput.setCustomValidity('');
+};
+hashtagsInput.addEventListener('keyup', clearErrorText);
+
 var onSubmitClick = function () {
   if (validateHashtags()) {
     var errorText = validateHashtags();
     hashtagsInput.setCustomValidity(errorText);
-    hashtagsInput.style.border = '2px red solid';
   }
   return false;
 };
 uploadSubmit.addEventListener('click', onSubmitClick);
 
-
-// СДЕЛАТЬ: Не закрывать аплоад-окно по эску, когда фокус на комментарии или хэштегах
 // ------ 3. Конец: валидация
 

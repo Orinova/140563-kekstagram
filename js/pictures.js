@@ -1,112 +1,44 @@
 'use strict';
 
-var PHOTOS_COUNT = 25;
-var AVATAR_VARIANTS = 6;
-var likes = {
-  MIN: 15,
-  MAX: 200
-};
-var comments = {
-  MAX: 5, //  возможно до 5 комментариев
-  SENTENCE_MAX: 2, // до 2 предложений
-  REPLICAS: [
-    'Всё отлично!',
-    'В целом всё неплохо. Но не всё.',
-    'Когда вы делаете фотографию, хорошо бы убирать палец из кадра. В конце концов это просто непрофессионально.',
-    'Моя бабушка случайно чихнула с фотоаппаратом в руках и у неё получилась фотография лучше.',
-    'Я поскользнулся на банановой кожуре и уронил фотоаппарат на кота и у меня получилась фотография лучше.',
-    'Лица у людей на фотке перекошены, как будто их избивают. Как можно было поймать такой неудачный момент?!'
-  ]
-};
-var DESCRIPTIONS = [
-  'Тестим новую камеру!',
-  'Затусили с друзьями на море',
-  'Как же круто тут кормят',
-  'Отдыхаем...',
-  'Цените каждое мгновенье. Цените тех, кто рядом с вами и отгоняйте все сомненья. Не обижайте всех словами......',
-  'Вот это тачка!'
-];
-
-var KEYCODE_ESC = 27;
+////////////////////////////////////    gallery.js    ////////////////////////////////////
+//                               Общее или не разобранное                               //
 var picturesSection = document.querySelector('.pictures');
 var gallery = document.querySelector('.big-picture');
 var galleryCloseBtn = document.querySelector('.big-picture__cancel');
 
-var uploadSection = document.querySelector('.img-upload');
-var uploadForm = uploadSection.querySelector('.img-upload__form');
-var uploadSubmit = uploadSection.querySelector('.img-upload__submit');
-var uploadFile = uploadSection.querySelector('#upload-file');
-var uploadOverlay = uploadSection.querySelector('.img-upload__overlay');
-var uploadCloseBtn = uploadSection.querySelector('.img-upload__cancel');
-var uploadImgPreview = uploadSection.querySelector('.img-upload__preview');
-
-
-var scale = {
-  RANGE: 25,
-  MIN: 25,
-  MAX: 100,
-  DEFAULT: 100
-};
-var resizeControls = uploadSection.querySelector('.resize');
-var resizePlus = resizeControls.querySelector('.resize__control--plus');
-var resizeMinus = resizeControls.querySelector('.resize__control--minus');
-var resizeValue = resizeControls.querySelector('.resize__control--value');
-
-var MAX_HASHTAGS = 5;
-var MAX_HASHTAG_LENGTH = 20;
-var errors = {
-  NO_SHARP: 'Хэш-тег должен начинается с символа # (решётка)',
-  EMPTY: 'Вы ввели пустой хэш-тег',
-  TOO_LONG: 'Длина хэш-тега не может превышать ' + MAX_HASHTAG_LENGTH + ' символов',
-  NO_SPACE: 'Разделите хэш-теги пробелами',
-  DUBLICATE: 'Хэш-теги не должны повторяться',
-  MAX_COUNT: 'Хэш-тегов не может быть более пяти'
-};
-var hashtagsInput = uploadForm.querySelector('.text__hashtags');
-var descriptionInput = uploadForm.querySelector('.text__description');
-
-// Генератор случайных чисел
-var getRandomNum = function (min, max) {
-  return Math.floor(Math.random() * (max - min + 1)) + min;
-};
-
-// Тасование массива
-var getShuffled = function (array) {
-  for (var i = array.length - 1; i > 0; i--) {
-    var j = getRandomNum(0, i);
-    var temp = array[i];
-    array[i] = array[j];
-    array[j] = temp;
+var onPhotoClick = function (evt) {
+  var target = evt.target;
+  if (target.className === 'picture__img') {
+    target = target.parentNode;
+    var index = target.getAttribute('id').substr(6);
+    showGallery(window.data[index]);
+    openGallery();
   }
-  return array;
+};
+var openGallery = function () {
+  document.querySelector('body').classList.add('modal-open');
+  gallery.classList.remove('hidden');
+};
+var closeGallery = function () {
+  document.querySelector('body').classList.remove('modal-open');
+  gallery.classList.add('hidden');
 };
 
-var generateComments = function (sentenceMax) {
-  var currentComments = [];
-  for (var j = 0; j < getRandomNum(1, comments.MAX); j++) { // количество комментариев, которое будет у фото
-    var variety = getShuffled(comments.REPLICAS); // перетряхиваем массив вариантов
-    var length = getRandomNum(1, sentenceMax); // получили нужное количество предложений
-    var text = variety.slice(0, length); // возвращаем из списка это количество
-    // сюда нужна проверка: если получившийся text совпадает с предыдущими наборами в currentComments, то выбираем заного
-    currentComments[j] = (length > 1) ? text.join(' ') : text.join('');
+var galleryEscPress = function (evt) {
+  if (evt.keyCode === KEYCODE_ESC && evt.target !== hashtagsInput && evt.target !== descriptionInput) {
+    closeGallery();
   }
-  return currentComments;
 };
+picturesSection.addEventListener('click', onPhotoClick);
+galleryCloseBtn.addEventListener('click', closeGallery);
+document.addEventListener('keydown', galleryEscPress);
 
-// Генерация массива случайных данных
-var createContent = function (photosCount) {
-  var photos = [];
-  for (var i = 0; i < photosCount; i++) {
-    photos[i] =
-      {
-        url: 'photos/' + (i + 1) + '.jpg',
-        likes: getRandomNum(likes.MIN, likes.MAX),
-        comments: generateComments(comments.SENTENCE_MAX),
-        description: DESCRIPTIONS[getRandomNum(0, DESCRIPTIONS.length - 1)],
-      };
-  }
-  return photos;
-};
+
+
+
+////////////////////////////////////    preview.js    ////////////////////////////////////
+//                        Вывод превью фото на главную страницу                         //
+
 
 // Создаем DOM элементы для переданного массива фотографий
 var createPhotoElement = function (index, photo) {
@@ -127,6 +59,20 @@ var appendPictures = function (photos) {
   }
   picturesSection.appendChild(fragment);
 };
+appendPictures(window.data); // вывели их на страницу
+
+
+
+
+
+////////////////////////////////////    picture.js    ////////////////////////////////////
+//                                   Большая картинка                                    //
+
+  // Генератор случайных чисел
+  var getRandomNum = function (min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+  };
+  var AVATAR_VARIANTS = 6;
 
 // Покажите элемент .big-picture, удалив у него класс .hidden
 // и заполните его данными из созданного массива
@@ -156,44 +102,57 @@ var showGallery = function (photo) {
   gallery.querySelector('.social__loadmore').classList.add('visually-hidden');
 };
 
-var photos = createContent(PHOTOS_COUNT);
-appendPictures(photos);
 
-// ------ 1. Начало: Галерея
-var onPhotoClick = function (evt) {
-  var target = evt.target;
-  if (target.className === 'picture__img') {
-    target = target.parentNode;
-    var index = target.getAttribute('id').substr(6);
-    showGallery(photos[index]);
-    openGallery();
-  }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+////////////////////////////////////    .js    ////////////////////////////////////
+//                                 Остальное                                  //
+
+
+var KEYCODE_ESC = 27;
+
+var uploadSection = document.querySelector('.img-upload');
+var uploadFile = uploadSection.querySelector('#upload-file');
+var uploadOverlay = uploadSection.querySelector('.img-upload__overlay');
+var uploadCloseBtn = uploadSection.querySelector('.img-upload__cancel');
+var uploadImgPreview = uploadSection.querySelector('.img-upload__preview');
+
+var scale = {
+  RANGE: 25,
+  MIN: 25,
+  MAX: 100,
+  DEFAULT: 100
 };
+var resizeControls = uploadSection.querySelector('.resize');
+var resizePlus = resizeControls.querySelector('.resize__control--plus');
+var resizeMinus = resizeControls.querySelector('.resize__control--minus');
+var resizeValue = resizeControls.querySelector('.resize__control--value');
 
-var openGallery = function () {
-  document.querySelector('body').classList.add('modal-open');
-  gallery.classList.remove('hidden');
-};
 
-var closeGallery = function () {
-  document.querySelector('body').classList.remove('modal-open');
-  gallery.classList.add('hidden');
-};
-
-var galleryEscPress = function (evt) {
-  /*
-    Тут не успела подумать как сделать запись короче...
-    И как избавиться от того, что функция galleryEscPress добавляет второй скролл (снимает класс modal-open),
-  */
-  if (evt.keyCode === KEYCODE_ESC && evt.target !== hashtagsInput && evt.target !== descriptionInput) {
-    closeGallery();
-  }
-};
-
-picturesSection.addEventListener('click', onPhotoClick);
-galleryCloseBtn.addEventListener('click', closeGallery);
-document.addEventListener('keydown', galleryEscPress);
-// ------ 1. Конец: Галерея
 
 
 // ------ 2. Начало: Загрузка фото
@@ -214,10 +173,6 @@ var closeUpload = function () {
   uploadOverlay.classList.add('hidden');
 };
 var onUploadEscPress = function (evt) {
-  /*
-    Тут не успела подумать как сделать запись короче...
-    И как избавиться от того, что функция galleryEscPress добавляет второй скролл (снимает класс modal-open),
-  */
   if (evt.keyCode === KEYCODE_ESC && evt.target !== hashtagsInput && evt.target !== descriptionInput) {
     closeUpload();
   }
@@ -351,63 +306,3 @@ effectPin.addEventListener('mousedown', function (evt) {
   document.addEventListener('mouseup', onMouseUp);
 });
 // ------ 2. Конец: галерея
-
-
-// ------ 3. Начало: валидация
-var checkDublicate = function (array, index) {
-  for (var i = 0; i < array.length; i++) {
-    if (array[index] === array[i] && index !== i) {
-      return true;
-    }
-  }
-  return false;
-};
-
-var validateHashtags = function () {
-  var hashtags = hashtagsInput.value.trim(); // получили значение хэштега, очистили оконечные пробелы
-  hashtags = hashtags.toLowerCase(); // сброс регистра
-  var errorText = '';
-
-  if (hashtags !== '') { // если поле не пустое, то проверяем его
-    hashtags = hashtags.split(/\s+/); // для этого разобъем на массив
-    if (hashtags.length > MAX_HASHTAGS) {
-      errorText = errors.MAX_COUNT;
-    }
-
-    for (var i = 0; i < hashtags.length; i++) {
-      if (hashtags[i][0] !== '#') {
-        errorText = errors.NO_SHARP;
-      }
-      if (hashtags[i].length > 20) {
-        errorText = errors.TOO_LONG;
-      }
-      if (hashtags[i][0] === '#' && hashtags[i].length < 2) {
-        errorText = errors.EMPTY;
-      }
-      if (hashtags[i].substring(1).search('#') !== -1) {
-        errorText = errors.NO_SPACE;
-      }
-      if (checkDublicate(hashtags, i)) {
-        errorText = errors.DUBLICATE;
-      }
-    }
-    hashtagsInput.setCustomValidity(errorText);
-  }
-};
-
-var clearErrorText = function () {
-  hashtagsInput.setCustomValidity('');
-};
-hashtagsInput.addEventListener('keyup', clearErrorText);
-
-var onSubmitClick = function () {
-  if (validateHashtags()) {
-    var errorText = validateHashtags();
-    hashtagsInput.setCustomValidity(errorText);
-  }
-  return false;
-};
-uploadSubmit.addEventListener('click', onSubmitClick);
-
-// ------ 3. Конец: валидация
-

@@ -34,10 +34,12 @@ var galleryCloseBtn = document.querySelector('.big-picture__cancel');
 
 var uploadSection = document.querySelector('.img-upload');
 var uploadForm = uploadSection.querySelector('.img-upload__form');
+var uploadSubmit = uploadSection.querySelector('.img-upload__submit');
 var uploadFile = uploadSection.querySelector('#upload-file');
 var uploadOverlay = uploadSection.querySelector('.img-upload__overlay');
 var uploadCloseBtn = uploadSection.querySelector('.img-upload__cancel');
 var uploadImgPreview = uploadSection.querySelector('.img-upload__preview');
+
 
 var scale = {
   RANGE: 25,
@@ -45,14 +47,6 @@ var scale = {
   MAX: 100,
   DEFAULT: 100
 };
-var DEFAULT_EFFECT_VALUE = 100;
-var uploadEffectScale = uploadSection.querySelector('.scale');
-var uploadEffectsList = uploadSection.querySelector('.effects__list');
-var uploadEffectSaturation = uploadSection.querySelector('.scale__value');
-var uploadEffectLine = uploadSection.querySelector('.scale__line');
-var uploadEffectLevel = uploadSection.querySelector('.scale__level');
-var uploadEffectPin = uploadSection.querySelector('.scale__pin');
-
 var resizeControls = uploadSection.querySelector('.resize');
 var resizePlus = resizeControls.querySelector('.resize__control--plus');
 var resizeMinus = resizeControls.querySelector('.resize__control--minus');
@@ -255,56 +249,65 @@ resizeMinus.addEventListener('click', function () {
 });
 
 // ------------ Добавление фильтра на фото
+
+var DEFAULT_EFFECT_VALUE = 100;
+var effectScale = uploadSection.querySelector('.scale');
+var effectsList = uploadSection.querySelector('.effects__list');
+var effectLine = uploadSection.querySelector('.scale__line');
+var effectPin = uploadSection.querySelector('.scale__pin');
+var effectLevel = uploadSection.querySelector('.scale__level');
+var effectSaturation = uploadSection.querySelector('.scale__value');
+
+
 var effects = {
-  chrome: function () {
-    return 'grayscale(' + uploadEffectSaturation.value / 100 + ')';
-  },
-  sepia: function () {
-    return 'sepia(' + uploadEffectSaturation.value / 100 + ')';
-  },
-  marvin: function () {
-    return 'invert(' + uploadEffectSaturation.value + '%)';
-  },
-  phobos: function () {
-    return 'blur(' + uploadEffectSaturation.value * 3 / 100 + 'px)';
-  },
-  heat: function () {
-    return 'brightness(' + (uploadEffectSaturation.value * 2 / 100 + 1) + ')';
-  },
-  none: function () {
-    return '';
-  }
+  chrome: 'grayscale(' + effectSaturation.value / 100 + ')',
+  sepia: 'sepia(' + effectSaturation.value / 100 + ')',
+  marvin: 'invert(' + effectSaturation.value + '%)',
+  phobos: 'blur(' + effectSaturation.value * 3 / 100 + 'px)',
+  heat: 'brightness(' + (effectSaturation.value * 2 / 100 + 1) + ')',
+  none: ''
 };
+
 var currentEffect;
 var setCurrentEffect = function (evt) {
   if (evt.target.tagName === 'INPUT') {
-    currentEffect = evt.target.value;
-    // сбрасываем стили, потом добавляем класс фильтры
-    uploadImgPreview.className = 'img-upload__preview';
-    uploadImgPreview.classList.add('effects__preview--' + currentEffect);
+    currentEffect = evt.target.value; // узнаем по какому фильтру кликнули
+
+    uploadImgPreview.className = 'img-upload__preview'; // сбрасываем стиль (очищаем ранее выбранный)
+    uploadImgPreview.classList.add('effects__preview--' + currentEffect); //потом добавляем класс фильтра
+
+    // Накладываем фильтр
+    effectSaturation.setAttribute('value', DEFAULT_EFFECT_VALUE);// указываем значение стартовой насыщенности
+    // ЗАМЕТКА: здесь вернуть пин к дефолтному значению
+    uploadImgPreview.style.filter = effects[currentEffect]; // выводим фильтр
 
     // проверяем на необходимость слайдера
     if (currentEffect === 'none') {
-      uploadEffectScale.classList.add('hidden');
+      effectScale.classList.add('hidden');
     } else {
-      uploadEffectScale.classList.remove('hidden');
+      effectScale.classList.remove('hidden');
     }
-
-    // Накладываем фильтр
-    uploadEffectSaturation.setAttribute('value', DEFAULT_EFFECT_VALUE);// указываем стартовый уровень
-    uploadImgPreview.style.filter = effects[currentEffect](); // выводим фильтр
   }
 };
-uploadEffectsList.addEventListener('click', setCurrentEffect);
+effectsList.addEventListener('click', setCurrentEffect);
 
 
 // ------------ Насыщенность фильтра
 var getSaturationLevel = function () {
-  return Math.round(uploadEffectPin.offsetLeft / uploadEffectLine.offsetWidth * 100);
+  return Math.round(effectPin.offsetLeft / effectLine.offsetWidth * 100);
 };
+
 var setSaturation = function () {
-  uploadEffectSaturation.setAttribute('value', getSaturationLevel());
-  uploadImgPreview.style.filter = effects[currentEffect]();
+  effectSaturation.setAttribute('value', getSaturationLevel());
+  var effects = {
+    chrome: 'grayscale(' + effectSaturation.value / 100 + ')',
+    sepia: 'sepia(' + effectSaturation.value / 100 + ')',
+    marvin: 'invert(' + effectSaturation.value + '%)',
+    phobos: 'blur(' + effectSaturation.value * 3 / 100 + 'px)',
+    heat: 'brightness(' + (effectSaturation.value * 2 / 100 + 1) + ')',
+    none: ''
+  };
+  uploadImgPreview.style.filter = effects[currentEffect];
 };
 
 // ------------ Перетаскивание пина
@@ -314,11 +317,11 @@ function getCoordX(elem) {
   return box.left + pageXOffset;
 }
 
-uploadEffectPin.addEventListener('mousedown', function (evt) {
+effectPin.addEventListener('mousedown', function (evt) {
   evt.preventDefault();
   var start = evt.clientX;
-  var maxOffset = uploadEffectLine.offsetWidth;
-  var minOffset = getCoordX(uploadEffectLevel);
+  var maxOffset = effectLine.offsetWidth;
+  var minOffset = getCoordX(effectLevel);
 
   var onMouseMove = function (moveEvt) {
     moveEvt.preventDefault();
@@ -328,10 +331,10 @@ uploadEffectPin.addEventListener('mousedown', function (evt) {
     }
     var shift = start - moveEvt.clientX;
     start = moveEvt.clientX;
-    var pinShift = uploadEffectPin.offsetLeft - shift;
+    var pinShift = effectPin.offsetLeft - shift;
     if (pinShift >= 0 && pinShift <= maxOffset) {
-      uploadEffectPin.style.left = pinShift + 'px';
-      uploadEffectLevel.style.width = pinShift + 'px';
+      effectPin.style.left = pinShift + 'px';
+      effectLevel.style.width = pinShift + 'px';
       setSaturation();
     }
   };
@@ -356,14 +359,6 @@ var checkDublicate = function (array, index) {
     }
   }
   return false;
-};
-var setDisplayError = function (errorText) {
-  if (hashtagsInput.validity.valid) {
-    hashtagsError.classList.remove('text__error--show');
-  } else {
-    hashtagsError.textContent = errorText;
-    hashtagsError.classList.add('text__error--show');
-  }
 };
 
 var validateHashtags = function () {
@@ -395,8 +390,22 @@ var validateHashtags = function () {
       }
     }
     hashtagsInput.setCustomValidity(errorText);
-    setDisplayError(errorText);
   }
 };
-hashtagsInput.addEventListener('keyup', validateHashtags);
+
+var clearErrorText = function () {
+  hashtagsInput.setCustomValidity('');
+};
+hashtagsInput.addEventListener('keyup', clearErrorText);
+
+var onSubmitClick = function () {
+  if (validateHashtags()) {
+    var errorText = validateHashtags();
+    hashtagsInput.setCustomValidity(errorText);
+  }
+  return false;
+};
+uploadSubmit.addEventListener('click', onSubmitClick);
+
 // ------ 3. Конец: валидация
+

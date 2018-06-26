@@ -826,13 +826,11 @@ main {
   border: none;
 }
 
-.hashtags {
-  margin-bottom: 20px;
-}
 .text__hashtags {
   width: 450px;
 
   margin: 0 auto;
+  margin-bottom: 20px;
   padding: 5px 10px;
 
   font-family: "Open Sans", "Arial", sans-serif;
@@ -840,9 +838,6 @@ main {
   color: #000000;
 
   border-radius: 5px;
-}
-.text__hashtags:focus {
-  outline:none;
 }
 
 .text__description {
@@ -857,29 +852,11 @@ main {
   color: #000000;
 
   border-radius: 5px;
-  resize: none;
 }
 
-.text__hashtags:invalid,
-.text__description:invalid {
-  border: 2px red solid;
-}
-
-.text__error {
-  height: 0;
-  overflow: hidden;
-
-  margin: 5px 0 0 0;
-
-  color: #ff8181;
-  text-transform: none;
-
-  transition: 0.25s;
-  transition-delay: 0.2s;
-}
-
-.text__error--show {
-  height: 20px;
+.text__hashtags:not(:focus):invalid,
+.text__description:not(:focus):invalid {
+ border: 2px solid red;
 }
 
 /* Кнопка отправки формы */

@@ -67,15 +67,6 @@ appendPictures(window.data); // вывели их на страницу
 
 ////////////////////////////////////    picture.js    ////////////////////////////////////
 //                                   Большая картинка                                    //
-
-  // Генератор случайных чисел
-  var getRandomNum = function (min, max) {
-    return Math.floor(Math.random() * (max - min + 1)) + min;
-  };
-  var AVATAR_VARIANTS = 6;
-
-// Покажите элемент .big-picture, удалив у него класс .hidden
-// и заполните его данными из созданного массива
 var showGallery = function (photo) {
   var commentsList = gallery.querySelector('.social__comments'); // список комментариев (ul)
   var socialComment = gallery.querySelector('.social__comment').cloneNode(true);
@@ -85,8 +76,8 @@ var showGallery = function (photo) {
   var fragment = document.createDocumentFragment();
   for (var i = 0; i < photo.comments.length; i++) {
     var comment = socialComment.cloneNode(true);
-    comment.querySelector('.social__picture').src = 'img/avatar-' + getRandomNum(1, AVATAR_VARIANTS) + '.svg';
-    comment.querySelector('.social__text').textContent = photo.comments[i];
+    comment.querySelector('.social__picture').src = photo.comments[i].avatar;
+    comment.querySelector('.social__text').textContent = photo.comments[i].text;
     fragment.appendChild(comment);
   }
   commentsList.appendChild(fragment);

@@ -47,11 +47,14 @@
   var generateComments = function (sentenceMax) {
     var currentComments = [];
     for (var j = 0; j < getRandomNum(1, comments.MAX); j++) { // количество комментариев, которое будет у фото
-      var variety = getShuffled(comments.REPLICAS); // перетряхиваем массив вариантов
-      var length = getRandomNum(1, sentenceMax); // получили нужное количество предложений
-      var text = variety.slice(0, length); // возвращаем из списка это количество
-      // сюда нужна проверка: если получившийся text совпадает с предыдущими наборами в currentComments, то выбираем заного
-      currentComments[j] = (length > 1) ? text.join(' ') : text.join('');
+      var variety = getShuffled(comments.REPLICAS); // перетряхиваем массив вариантов фраз
+      var length = getRandomNum(1, sentenceMax); // получили нужное количество предложений (одна или две)
+      var text = variety.slice(0, length); // "срезаем" из перемешанного массива это количество
+      text = (length > 1) ? text.join(' ') : text.join(''); // если предложений два, то добавляем пробел между ними
+      currentComments[j] = {
+        text: text,
+        avatar: 'img/avatar-' + getRandomNum(1, AVATAR_VARIANTS) + '.svg' // слаучайная аватарка для комментария
+      };
     }
     return currentComments;
   };
@@ -71,6 +74,6 @@
     return photos;
   };
 
-  // запускаем генерацию информации на 25 (PHOTOS_COUNT) карточек и отдаем "наружу".
+  // запускаем генерацию информации на 25 (PHOTOS_COUNT) карточек и отдаем массив
   window.data = createContent(PHOTOS_COUNT);
 })();

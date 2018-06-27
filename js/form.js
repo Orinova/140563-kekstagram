@@ -1,4 +1,5 @@
 'use strict';
+
 (function () {
   var uploadSection = document.querySelector('.img-upload'); // общий с effect.js и scale.js
   var uploadFile = uploadSection.querySelector('#upload-file');
@@ -9,7 +10,9 @@
     document.querySelector('body').classList.add('modal-open');
     uploadOverlay.classList.remove('hidden');
     document.addEventListener('keydown', onUploadEscPress);
+    uploadCloseBtn.addEventListener('click', closeUpload);
   };
+  uploadFile.addEventListener('change', openUpload);
 
   var closeUpload = function () {
     document.querySelector('body').classList.remove('modal-open');
@@ -18,12 +21,15 @@
     window.scale.setDefault();
     window.effect.setDefault();
     window.validate.clear();
+    document.removeEventListener('keydown', onUploadEscPress);
   };
 
   var onUploadEscPress = function (evt) {
-    window.util.isEscEvent(evt, closeUpload);
+    if (evt.target.className !== 'text__hashtags' && evt.target.className !== 'text__description') {
+      if (window.utils.isEscEvent(evt)) {
+        closeUpload();
+      }
+    }
   };
 
-  uploadFile.addEventListener('change', openUpload);
-  uploadCloseBtn.addEventListener('click', closeUpload);
 })();

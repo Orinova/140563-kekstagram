@@ -28,32 +28,17 @@
     'Вот это тачка!'
   ];
 
-  // Генератор случайных чисел
-  var getRandomNum = function (min, max) {
-    return Math.floor(Math.random() * (max - min + 1)) + min;
-  };
-
-  // Тасование массива
-  var getShuffled = function (array) {
-    for (var i = array.length - 1; i > 0; i--) {
-      var j = getRandomNum(0, i);
-      var temp = array[i];
-      array[i] = array[j];
-      array[j] = temp;
-    }
-    return array;
-  };
 
   var generateComments = function (sentenceMax) {
     var currentComments = [];
-    for (var j = 0; j < getRandomNum(1, comments.MAX); j++) { // количество комментариев, которое будет у фото
-      var variety = getShuffled(comments.REPLICAS); // перетряхиваем массив вариантов фраз
-      var length = getRandomNum(1, sentenceMax); // получили нужное количество предложений (одна или две)
+    for (var j = 0; j < window.utils.getRandomNum(1, comments.MAX); j++) { // количество комментариев, которое будет у фото
+      var variety = window.utils.getShuffled(comments.REPLICAS); // перетряхиваем массив вариантов фраз
+      var length = window.utils.getRandomNum(1, sentenceMax); // получили нужное количество предложений (одна или две)
       var text = variety.slice(0, length); // "срезаем" из перемешанного массива это количество
       text = (length > 1) ? text.join(' ') : text.join(''); // если предложений два, то добавляем пробел между ними
       currentComments[j] = {
         text: text,
-        avatar: 'img/avatar-' + getRandomNum(1, AVATAR_VARIANTS) + '.svg' // слаучайная аватарка для комментария
+        avatar: 'img/avatar-' + window.utils.getRandomNum(1, AVATAR_VARIANTS) + '.svg' // слаучайная аватарка для комментария
       };
     }
     return currentComments;
@@ -66,9 +51,9 @@
       photos[i] =
         {
           url: 'photos/' + (i + 1) + '.jpg',
-          likes: getRandomNum(likes.MIN, likes.MAX),
+          likes: window.utils.getRandomNum(likes.MIN, likes.MAX),
           comments: generateComments(comments.SENTENCE_MAX),
-          description: DESCRIPTIONS[getRandomNum(0, DESCRIPTIONS.length - 1)],
+          description: DESCRIPTIONS[window.utils.getRandomNum(0, DESCRIPTIONS.length - 1)],
         };
     }
     return photos;

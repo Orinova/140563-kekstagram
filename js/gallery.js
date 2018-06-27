@@ -13,6 +13,7 @@
       openGallery(); // открываем попап большой фотографии
     }
   };
+  picturesSection.addEventListener('click', onPhotoClick);
 
   var renderGallery = function (photo) {
     var commentsList = gallery.querySelector('.social__comments'); // получили старый список комментариев (ul)
@@ -43,21 +44,22 @@
   var openGallery = function () {
     document.querySelector('body').classList.add('modal-open');
     gallery.classList.remove('hidden');
+    document.addEventListener('keydown', galleryEscPress); // включаем отслеживание Esc
+
+    var galleryCloseBtn = document.querySelector('.big-picture__cancel');
+    galleryCloseBtn.addEventListener('click', closeGallery);
   };
 
   var closeGallery = function () {
     document.querySelector('body').classList.remove('modal-open');
     gallery.classList.add('hidden');
+    document.removeEventListener('keydown', galleryEscPress); // выключаем
+
   };
 
   var galleryEscPress = function (evt) {
-    window.util.isEscEvent(evt, closeGallery);
+    if (window.utils.isEscEvent(evt)) {
+      closeGallery();
+    }
   };
-
-  picturesSection.addEventListener('click', onPhotoClick);
-
-  var galleryCloseBtn = document.querySelector('.big-picture__cancel');
-  galleryCloseBtn.addEventListener('click', closeGallery);
-
-  document.addEventListener('keydown', galleryEscPress);
 })();

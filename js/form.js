@@ -1,6 +1,4 @@
 'use strict';
-var KEYCODE_ESC = 27; // отправить в utils
-
 (function () {
   var uploadSection = document.querySelector('.img-upload'); // общий с effect.js и scale.js
   var uploadFile = uploadSection.querySelector('#upload-file');
@@ -23,9 +21,7 @@ var KEYCODE_ESC = 27; // отправить в utils
   };
 
   var onUploadEscPress = function (evt) {
-    if (evt.keyCode === KEYCODE_ESC && evt.target.className !== 'text__hashtags' && evt.target.className !== 'text__description') {
-      closeUpload();
-    }
+    window.util.isEscEvent(evt, closeUpload);
   };
 
   uploadFile.addEventListener('change', openUpload);

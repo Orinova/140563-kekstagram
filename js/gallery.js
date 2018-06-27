@@ -1,6 +1,4 @@
 'use strict';
-var KEYCODE_ESC = 27; // отправить в utils
-
 (function () {
   var picturesSection = document.querySelector('.pictures');
   var gallery = document.querySelector('.big-picture');
@@ -53,9 +51,7 @@ var KEYCODE_ESC = 27; // отправить в utils
   };
 
   var galleryEscPress = function (evt) {
-    if (evt.keyCode === KEYCODE_ESC && evt.target.className !== 'text__hashtags' && evt.target.className !== 'text__description') {
-      closeGallery();
-    }
+    window.util.isEscEvent(evt, closeGallery);
   };
 
   picturesSection.addEventListener('click', onPhotoClick);

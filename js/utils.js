@@ -24,10 +24,18 @@
     return array;
   };
 
+  var showError = function (errorMessage) {
+    var node = document.createElement('div');
+    node.classList.add('error');
+    node.textContent = errorMessage;
+    document.body.appendChild(node);
+  };
+
   window.utils = {
     isEscEvent: isEscEvent,
     getRandomNum: getRandomNum,
-    getShuffled: getShuffled
+    getShuffled: getShuffled,
+    showError: showError
   };
 
 })();

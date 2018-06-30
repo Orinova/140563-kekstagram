@@ -47,6 +47,10 @@
     }
   };
 
+  var onUploadForm = function () {
+    closeUpload();
+  };
+
   hashtagsInput.addEventListener('focusin', function () {
     document.removeEventListener('keydown', onUploadEscPress);
   });
@@ -61,6 +65,11 @@
 
   descriptionInput.addEventListener('focusout', function () {
     document.addEventListener('keydown', onUploadEscPress);
+  });
+
+  uploadForm.addEventListener('submit', function (evt) {
+    evt.preventDefault();
+    window.backend.upload(new FormData(uploadForm), onUploadForm, window.utils.showError);
   });
 
   // ---------- Валидация

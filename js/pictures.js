@@ -2,8 +2,7 @@
 
 (function () {
   var picturesSection = document.querySelector('.pictures');
-  // Маша, у меня этот селектор повторяется в gallery.js
-  // Есть идеи как укомплектовать чтобы не повторялось?
+  var picturesData = [];
 
   // Создаем DOM элементы для переданного массива фотографий
   var createPhotoElement = function (index, photo) {
@@ -24,6 +23,17 @@
     }
     picturesSection.appendChild(fragment);
   };
-  // вывели их на страницу
-  appendPictures(window.data);
+
+  // получаем данные с сервера и работаем с ними
+  var onSuccess = function (data) {
+    picturesData = data;
+    appendPictures(data);
+    window.pictures = { // а здесь я упоролась
+      data: picturesData
+    };
+  };
+  var onError = function (errorMessage) {
+    window.utils.showError(errorMessage);
+  };
+  window.backend.download(onSuccess, onError);
 })();

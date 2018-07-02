@@ -1,7 +1,6 @@
 'use strict';
 
 (function () {
-  var DOWNLOAD_URL = 'https://js.dump.academy/kekstagram/data';
   var UPLOAD_URL = 'https://js.dump.academy/kekstagram';
   var TIMEOUT = 10000;
   var SUCCESS_CODE = 200;
@@ -30,7 +29,7 @@
 
   var download = function (onLoad, onError) {
     var xhr = createXHR(onLoad, onError);
-    xhr.open('GET', DOWNLOAD_URL);
+    xhr.open('GET', UPLOAD_URL + '/data');
     xhr.send();
   };
 

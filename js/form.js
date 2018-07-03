@@ -135,6 +135,7 @@
 
   var showError = function () {
     var uploadStart = document.querySelector('.img-upload__start');
+    closeUpload();
     uploadStart.classList.add('hidden');
 
     var errorTemplate = document.querySelector('.img-upload__message--error').cloneNode(true);

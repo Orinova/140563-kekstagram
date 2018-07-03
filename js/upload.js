@@ -34,11 +34,15 @@
   var closeUpload = function () {
     document.querySelector('body').classList.remove('modal-open');
     uploadOverlay.classList.add('hidden');
+    resetForm();
+    document.removeEventListener('keydown', onUploadEscPress);
+  };
+
+  var resetForm = function () {
     uploadFile.value = '';
     window.scale.setDefault();
     window.effect.setDefault();
     clearInputs();
-    document.removeEventListener('keydown', onUploadEscPress);
   };
 
   var onUploadEscPress = function (evt) {
@@ -65,7 +69,7 @@
 
   uploadForm.addEventListener('submit', function (evt) {
     evt.preventDefault();
-    window.backend.upload(new FormData(uploadForm), closeUpload, showError);
+    window.backend.upload(new FormData(uploadForm), closeUpload, window.utils.showError);
   });
 
   // ---------- Валидация
@@ -131,16 +135,8 @@
     descriptionInput.value = '';
   };
 
-  // -------------------- Ошибка
-
-  var showError = function () {
-    var uploadStart = document.querySelector('.img-upload__start');
-    closeUpload();
-    uploadStart.classList.add('hidden');
-
-    var errorTemplate = document.querySelector('.img-upload__message--error').cloneNode(true);
-    uploadForm.appendChild(errorTemplate);
-    errorTemplate.classList.remove('hidden');
+  window.upload = {
+    reset: resetForm,
+    open: openUpload
   };
-
 })();

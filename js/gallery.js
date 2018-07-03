@@ -80,8 +80,8 @@
 
   // Создаем DOM элементы для переданного массива фотографий
   var createPhotoElement = function (index, photo) {
-    var photoElement = document.querySelector('#picture').content.cloneNode(true);
-    photoElement.querySelector('.picture__link').id = index;
+    var photoElement = document.querySelector('#picture').content.querySelector('.picture__link').cloneNode(true);
+    photoElement.id = index;
     photoElement.querySelector('.picture__img').alt = photo.description;
     photoElement.querySelector('.picture__img').src = photo.url;
     photoElement.querySelector('.picture__stat--likes').textContent = photo.likes;
@@ -103,6 +103,6 @@
     picturesData = data;
     appendPictures(data);
   };
-  window.backend.download(onSuccess);
+  window.backend.download(onSuccess, window.utils.showError);
 
 })();

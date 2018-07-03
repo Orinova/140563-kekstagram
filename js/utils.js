@@ -24,11 +24,42 @@
     return array;
   };
 
+  var uploadForm = document.querySelector('.img-upload__form');
+  var uploadStart = document.querySelector('.img-upload__start');
+  var errorTemplate = document.querySelector('#picture').content.querySelector('.img-upload__message--error').cloneNode(true);
+
+  var showError = function (errorMessage) {
+    uploadStart.classList.add('hidden');
+
+    if (errorMessage) {
+      errorTemplate.textContent = errorMessage;
+    }
+    errorTemplate.classList.remove('hidden');
+    uploadForm.appendChild(errorTemplate);
+
+    var repeatLink = errorTemplate.querySelector('.error__link--repeat');
+    repeatLink.addEventListener('click', onRepeat);
+
+    var resetLink = errorTemplate.querySelector('.error__link--reset');
+    resetLink.addEventListener('click', onReset);
+  };
+
+  var onReset = function () {
+    window.upload.reset();
+    uploadForm.removeChild(errorTemplate);
+    uploadStart.classList.remove('hidden');
+  };
+
+  var onRepeat = function () {
+    window.upload.open();
+    uploadForm.removeChild(errorTemplate);
+    uploadStart.classList.remove('hidden');
+  };
 
   window.utils = {
     isEscEvent: isEscEvent,
     getRandomNum: getRandomNum,
-    getShuffled: getShuffled
+    getShuffled: getShuffled,
+    showError: showError
   };
-
 })();

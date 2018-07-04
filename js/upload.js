@@ -29,12 +29,14 @@
     document.addEventListener('keydown', onUploadEscPress);
     uploadCloseBtn.addEventListener('click', closeUpload);
   };
-  uploadFile.addEventListener('change', openUpload);
+  uploadFile.addEventListener('change', function () { // в openUpload в обработчик добавь resetForm()
+    resetForm();
+    openUpload();
+  });
 
   var closeUpload = function () {
     document.querySelector('body').classList.remove('modal-open');
     uploadOverlay.classList.add('hidden');
-    resetForm();
     document.removeEventListener('keydown', onUploadEscPress);
   };
 
@@ -48,6 +50,7 @@
   var onUploadEscPress = function (evt) {
     if (window.utils.isEscEvent(evt)) {
       closeUpload();
+      resetForm();
     }
   };
 
@@ -65,11 +68,6 @@
 
   descriptionInput.addEventListener('focusout', function () {
     document.addEventListener('keydown', onUploadEscPress);
-  });
-
-  uploadForm.addEventListener('submit', function (evt) {
-    evt.preventDefault();
-    window.backend.upload(new FormData(uploadForm), closeUpload, window.utils.showError);
   });
 
   // ---------- Валидация
@@ -111,8 +109,8 @@
           errorText = errors.DUBLICATE;
         }
       }
-      hashtagsInput.setCustomValidity(errorText);
     }
+    return errorText;
   };
 
   var clearErrorText = function () {
@@ -120,14 +118,26 @@
   };
   hashtagsInput.addEventListener('keyup', clearErrorText);
 
-  var onSubmitClick = function () {
-    if (validateHashtags()) {
-      var errorText = validateHashtags();
+  var onSubmitClick = function (evt) {
+    var errorText = validateHashtags();
+    if (errorText) {
       hashtagsInput.setCustomValidity(errorText);
+    } else {
+      evt.preventDefault(evt);
+      window.backend.upload(new FormData(uploadForm), onSuccess, onError);
     }
-    return false;
   };
   uploadSubmit.addEventListener('click', onSubmitClick);
+
+  var onSuccess = function () {
+    resetForm();
+    closeUpload();
+  };
+
+  var onError = function () {
+    closeUpload();
+    window.errors.show();
+  };
 
   var clearInputs = function () {
     clearErrorText();
@@ -137,6 +147,6 @@
 
   window.upload = {
     reset: resetForm,
-    open: openUpload
+    repeat: onSubmitClick
   };
 })();

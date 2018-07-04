@@ -103,6 +103,12 @@
     picturesData = data;
     appendPictures(data);
   };
-  window.backend.download(onSuccess, window.utils.showError);
+
+  var onError = function (errorMessage) {
+    window.errors.message(errorMessage);
+    window.errors.show();
+  };
+
+  window.backend.download(onSuccess, onError);
 
 })();

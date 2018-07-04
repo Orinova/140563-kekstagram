@@ -14,7 +14,7 @@
     uploadForm.appendChild(errorTemplate);
   };
 
-  var setMessage = function (message) {
+  var showMessage = function (message) {
     errorTemplate.textContent = message;
   };
 
@@ -35,9 +35,9 @@
   repeatLink.addEventListener('click', onRepeat);
   resetLink.addEventListener('click', onReset);
 
-  window.errors = {
+  window.error = {
     show: showError,
-    setMessage: setMessage
+    message: showMessage
   };
 
 })();

@@ -93,20 +93,25 @@
   var appendPictures = function (photos) {
     var fragment = document.createDocumentFragment();
     for (var i = 0; i < photos.length; i++) {
-      fragment.appendChild(createPhotoElement('photo_' + i, photos[i]));
+      fragment.appendChild(createPhotoElement('photo_' + photos[i].id, photos[i]));
     }
     picturesSection.appendChild(fragment);
   };
 
-  // получаем данные с сервера и работаем с ними
+  // получаем данные с сервера
   var onSuccess = function (data) {
     picturesData = data;
-    appendPictures(data);
+    // при получении добавляю id в массив для открытия большого фото
+    for (var i = 0; i < picturesData.length; i++) {
+      picturesData[i].id = i;
+    }
+    // и заполняю страничку превьюшками
+    appendPictures(picturesData);
   };
 
   var onError = function (message) {
-    window.errors.setMessage(message);
-    window.errors.show();
+    window.error.message(message);
+    window.error.show();
   };
 
   window.backend.download(onSuccess, onError);
@@ -116,3 +121,5 @@
   };
 })();
 
+
+//

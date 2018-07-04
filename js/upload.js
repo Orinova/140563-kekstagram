@@ -27,12 +27,12 @@
     document.querySelector('body').classList.add('modal-open');
     uploadOverlay.classList.remove('hidden');
     document.addEventListener('keydown', onUploadEscPress);
-    uploadCloseBtn.addEventListener('click', closeUpload);
+    uploadCloseBtn.addEventListener('click', function () {
+      resetForm();
+      closeUpload();
+    });
   };
-  uploadFile.addEventListener('change', function () { // в openUpload в обработчик добавь resetForm()
-    resetForm();
-    openUpload();
-  });
+  uploadFile.addEventListener('change', openUpload);
 
   var closeUpload = function () {
     document.querySelector('body').classList.remove('modal-open');
@@ -136,7 +136,7 @@
 
   var onError = function () {
     closeUpload();
-    window.errors.show();
+    window.error.show();
   };
 
   var clearInputs = function () {

@@ -104,11 +104,15 @@
     appendPictures(data);
   };
 
-  var onError = function (errorMessage) {
-    window.errors.message(errorMessage);
+  var onError = function (message) {
+    window.errors.setMessage(message);
     window.errors.show();
   };
 
   window.backend.download(onSuccess, onError);
 
+  window.gallery = {
+    append: appendPictures
+  };
 })();
+

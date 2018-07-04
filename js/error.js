@@ -14,7 +14,7 @@
     uploadForm.appendChild(errorTemplate);
   };
 
-  var showMessage = function (message) {
+  var setMessage = function (message) {
     errorTemplate.textContent = message;
   };
 
@@ -37,7 +37,7 @@
 
   window.error = {
     show: showError,
-    message: showMessage
+    message: setMessage
   };
 
 })();

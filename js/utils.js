@@ -29,5 +29,4 @@
     getRandomNum: getRandomNum,
     getShuffled: getShuffled
   };
-
 })();

@@ -27,23 +27,30 @@
     document.querySelector('body').classList.add('modal-open');
     uploadOverlay.classList.remove('hidden');
     document.addEventListener('keydown', onUploadEscPress);
-    uploadCloseBtn.addEventListener('click', closeUpload);
+    uploadCloseBtn.addEventListener('click', function () {
+      resetForm();
+      closeUpload();
+    });
   };
   uploadFile.addEventListener('change', openUpload);
 
   var closeUpload = function () {
     document.querySelector('body').classList.remove('modal-open');
     uploadOverlay.classList.add('hidden');
+    document.removeEventListener('keydown', onUploadEscPress);
+  };
+
+  var resetForm = function () {
     uploadFile.value = '';
     window.scale.setDefault();
     window.effect.setDefault();
     clearInputs();
-    document.removeEventListener('keydown', onUploadEscPress);
   };
 
   var onUploadEscPress = function (evt) {
     if (window.utils.isEscEvent(evt)) {
       closeUpload();
+      resetForm();
     }
   };
 
@@ -102,8 +109,8 @@
           errorText = errors.DUBLICATE;
         }
       }
-      hashtagsInput.setCustomValidity(errorText);
     }
+    return errorText;
   };
 
   var clearErrorText = function () {
@@ -111,14 +118,26 @@
   };
   hashtagsInput.addEventListener('keyup', clearErrorText);
 
-  var onSubmitClick = function () {
-    if (validateHashtags()) {
-      var errorText = validateHashtags();
+  var onSubmitClick = function (evt) {
+    var errorText = validateHashtags();
+    if (errorText) {
       hashtagsInput.setCustomValidity(errorText);
+    } else {
+      evt.preventDefault(evt);
+      window.backend.upload(new FormData(uploadForm), onSuccess, onError);
     }
-    return false;
   };
   uploadSubmit.addEventListener('click', onSubmitClick);
+
+  var onSuccess = function () {
+    resetForm();
+    closeUpload();
+  };
+
+  var onError = function () {
+    closeUpload();
+    window.error.show();
+  };
 
   var clearInputs = function () {
     clearErrorText();
@@ -126,4 +145,8 @@
     descriptionInput.value = '';
   };
 
+  window.upload = {
+    reset: resetForm,
+    repeat: onSubmitClick
+  };
 })();

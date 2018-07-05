@@ -11,6 +11,7 @@
   var uploadSubmit = uploadForm.querySelector('.img-upload__submit');
   var hashtagsInput = uploadForm.querySelector('.text__hashtags');
   var descriptionInput = uploadForm.querySelector('.text__description');
+  var defaultEffect = uploadForm.querySelector('#effect-none');
 
   var MAX_HASHTAGS = 5;
   var MAX_HASHTAG_LENGTH = 20;
@@ -143,6 +144,7 @@
     clearErrorText();
     hashtagsInput.value = '';
     descriptionInput.value = '';
+    defaultEffect.checked = true;
   };
 
   window.upload = {
@@ -150,3 +152,5 @@
     repeat: onSubmitClick
   };
 })();
+
+

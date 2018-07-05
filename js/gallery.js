@@ -48,7 +48,6 @@
     gallery.querySelector('.likes-count').textContent = photo.likes;
     gallery.querySelector('.comments-count').textContent = photo.comments.length;
 
-    // Спрячьте блоки - это по заданию module3-task1, пятый пункт
     gallery.querySelector('.social__comment-count').classList.add('visually-hidden');
     gallery.querySelector('.social__loadmore').classList.add('visually-hidden');
   };
@@ -56,7 +55,7 @@
   var openGallery = function () {
     document.querySelector('body').classList.add('modal-open');
     gallery.classList.remove('hidden');
-    document.addEventListener('keydown', galleryEscPress); // включаем отслеживание Esc
+    document.addEventListener('keydown', galleryEscPress);
 
     var galleryCloseBtn = document.querySelector('.big-picture__cancel');
     galleryCloseBtn.addEventListener('click', closeGallery);
@@ -98,28 +97,76 @@
     picturesSection.appendChild(fragment);
   };
 
-  // получаем данные с сервера
+  // --- Сортировки картинок
+
+  var ACTIVE_CLASS = 'img-filters__button--active';
+  var INACTIVE_CLASS = 'img-filters--inactive';
+
+  var filtersBox = document.querySelector('.img-filters');
+  var filterBtns = filtersBox.querySelectorAll('.img-filters__button');
+  var filterActiveBtn = filtersBox.querySelector('.img-filters__button--active');
+
+  var filterMethods = {
+    'filter-popular': function () {
+      return picturesData;
+    },
+    'filter-new': function () {
+      var newPhotos = picturesData.slice(0, 10);
+      newPhotos = window.utils.getShuffled(newPhotos);
+      return newPhotos;
+    },
+    'filter-discussed': function (data) {
+      return data.sort(function (a, b) {
+        return b.comments.length - a.comments.length;
+      });
+    }
+  };
+
+  var clearPictures = function () {
+    var photosList = picturesSection.querySelectorAll('.picture__link');
+    photosList.forEach(function (item) {
+      item.parentNode.removeChild(item);
+    });
+  };
+
+  var switchFilter = window.utils.debounce(function (evt) {
+    var photos = picturesData.slice(0);
+    var currentBtn = evt.target;
+    var currentFilter = currentBtn.id;
+
+    if (!currentBtn.classList.contains(ACTIVE_CLASS)) {
+      photos = filterMethods[currentFilter](photos);
+
+      filterActiveBtn.classList.remove(ACTIVE_CLASS);
+      currentBtn.classList.add(ACTIVE_CLASS);
+      filterActiveBtn = currentBtn;
+
+      clearPictures();
+      appendPictures(photos);
+    }
+  }, 500);
+
+  filterBtns.forEach(function (btn) {
+    btn.addEventListener('click', switchFilter);
+  });
+
+
+  // --- получаем данные с сервера
   var onSuccess = function (data) {
     picturesData = data;
     // при получении добавляю id в массив для открытия большого фото
     for (var i = 0; i < picturesData.length; i++) {
       picturesData[i].id = i;
     }
-    // и заполняю страничку превьюшками
     appendPictures(picturesData);
+    filtersBox.classList.remove(INACTIVE_CLASS);
   };
 
   var onError = function (message) {
-    window.error.message(message);
+    window.error.setMessage(message);
     window.error.show();
   };
 
   window.backend.download(onSuccess, onError);
 
-  window.gallery = {
-    append: appendPictures
-  };
 })();
-
-
-//

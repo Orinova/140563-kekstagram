@@ -37,7 +37,7 @@
 
   window.error = {
     show: showError,
-    message: setMessage
+    setMessage: setMessage
   };
 
 })();

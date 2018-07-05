@@ -98,25 +98,7 @@
     picturesSection.appendChild(fragment);
   };
 
-  // получаем данные с сервера
-  var onSuccess = function (data) {
-    picturesData = data;
-    // при получении добавляю id в массив для открытия большого фото
-    for (var i = 0; i < picturesData.length; i++) {
-      picturesData[i].id = i;
-    }
-    appendPictures(picturesData);
-    filtersBox.classList.remove(INACTIVE_CLASS);
-  };
-
-  var onError = function (message) {
-    window.error.message(message);
-    window.error.show();
-  };
-
-  window.backend.download(onSuccess, onError);
-
-// --- Сортировки картинок
+  // --- Сортировки картинок
 
   var ACTIVE_CLASS = 'img-filters__button--active';
   var INACTIVE_CLASS = 'img-filters--inactive';
@@ -143,27 +125,49 @@
 
 
   filterBtns.forEach(function (btn) {
-    btn.addEventListener('click', function (evt) {
-      var photos = picturesData.slice(0);
-      var currentBtn = evt.target;
-      var currentFilter = currentBtn.id;
-
-      if (!currentBtn.classList.contains(ACTIVE_CLASS)) {
-        photos = filterMethods[currentFilter](photos);
-
-        filterActiveBtn.classList.remove(ACTIVE_CLASS);
-        currentBtn.classList.add(ACTIVE_CLASS);
-        filterActiveBtn = currentBtn;
-
-        // Зачистка предыдущих фото:
-        var photosListItemElement = picturesSection.querySelectorAll('.picture__link');
-        photosListItemElement.forEach(function (item) {
-          item.parentNode.removeChild(item);
-        });
-
-        appendPictures(photos);
-      }
-    });
+    btn.addEventListener('click', switchFilter);
   });
+
+  var clearPictures = function () {
+    var photosList = picturesSection.querySelectorAll('.picture__link');
+    photosList.forEach(function (item) {
+      item.parentNode.removeChild(item);
+    });
+  };
+
+  var switchFilter = function (evt) {
+    var photos = picturesData.slice(0);
+    var currentBtn = evt.target;
+    var currentFilter = currentBtn.id;
+
+    if (!currentBtn.classList.contains(ACTIVE_CLASS)) {
+      photos = filterMethods[currentFilter](photos);
+
+      filterActiveBtn.classList.remove(ACTIVE_CLASS);
+      currentBtn.classList.add(ACTIVE_CLASS);
+      filterActiveBtn = currentBtn;
+
+      clearPictures();
+      appendPictures(photos);
+    }
+  };
+
+  // получаем данные с сервера
+  var onSuccess = function (data) {
+    picturesData = data;
+    // при получении добавляю id в массив для открытия большого фото
+    for (var i = 0; i < picturesData.length; i++) {
+      picturesData[i].id = i;
+    }
+    appendPictures(picturesData);
+    filtersBox.classList.remove(INACTIVE_CLASS);
+  };
+
+  var onError = function (message) {
+    window.error.setMessage(message);
+    window.error.show();
+  };
+
+  window.backend.download(onSuccess, onError);
 
 })();

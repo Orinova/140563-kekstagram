@@ -48,7 +48,6 @@
     gallery.querySelector('.likes-count').textContent = photo.likes;
     gallery.querySelector('.comments-count').textContent = photo.comments.length;
 
-    // Спрячьте блоки - это по заданию module3-task1, пятый пункт
     gallery.querySelector('.social__comment-count').classList.add('visually-hidden');
     gallery.querySelector('.social__loadmore').classList.add('visually-hidden');
   };
@@ -56,7 +55,7 @@
   var openGallery = function () {
     document.querySelector('body').classList.add('modal-open');
     gallery.classList.remove('hidden');
-    document.addEventListener('keydown', galleryEscPress); // включаем отслеживание Esc
+    document.addEventListener('keydown', galleryEscPress);
 
     var galleryCloseBtn = document.querySelector('.big-picture__cancel');
     galleryCloseBtn.addEventListener('click', closeGallery);
@@ -123,11 +122,6 @@
     }
   };
 
-
-  filterBtns.forEach(function (btn) {
-    btn.addEventListener('click', switchFilter);
-  });
-
   var clearPictures = function () {
     var photosList = picturesSection.querySelectorAll('.picture__link');
     photosList.forEach(function (item) {
@@ -135,7 +129,7 @@
     });
   };
 
-  var switchFilter = function (evt) {
+  var switchFilter = window.utils.debounce(function (evt) {
     var photos = picturesData.slice(0);
     var currentBtn = evt.target;
     var currentFilter = currentBtn.id;
@@ -150,9 +144,14 @@
       clearPictures();
       appendPictures(photos);
     }
-  };
+  }, 500);
 
-  // получаем данные с сервера
+  filterBtns.forEach(function (btn) {
+    btn.addEventListener('click', switchFilter);
+  });
+
+
+  // --- получаем данные с сервера
   var onSuccess = function (data) {
     picturesData = data;
     // при получении добавляю id в массив для открытия большого фото

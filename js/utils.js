@@ -24,9 +24,24 @@
     return array;
   };
 
+  var debounce = function (func, wait, context) {
+    var timer;
+    return function () {
+      var args = arguments;
+      clearTimeout(timer);
+
+      var later = function () {
+        func.apply(context, args);
+        timer = null;
+      };
+      timer = setTimeout(later, wait);
+    };
+  };
+
   window.utils = {
     isEscEvent: isEscEvent,
     getRandomNum: getRandomNum,
-    getShuffled: getShuffled
+    getShuffled: getShuffled,
+    debounce: debounce
   };
 })();

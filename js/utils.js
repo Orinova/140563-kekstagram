@@ -3,9 +3,15 @@
 (function () {
 
   var KEYCODE_ESC = 27;
+  var KEYCODE_ENTER = 13;
+  var DEBOUNCE_INTERVAL = 500;
 
   var isEscEvent = function (evt) {
     return evt.keyCode === KEYCODE_ESC;
+  };
+
+  var isEnterEvent = function (evt) {
+    return evt.keyCode === KEYCODE_ENTER;
   };
 
   // Генератор случайных чисел
@@ -24,22 +30,23 @@
     return array;
   };
 
-  var debounce = function (func, wait, context) {
-    var timer;
+  var debounce = function (fun) {
+    var lastTimeout = null;
+
     return function () {
       var args = arguments;
-      clearTimeout(timer);
-
-      var later = function () {
-        func.apply(context, args);
-        timer = null;
-      };
-      timer = setTimeout(later, wait);
+      if (lastTimeout) {
+        window.clearTimeout(lastTimeout);
+      }
+      lastTimeout = window.setTimeout(function () {
+        fun.apply(null, args);
+      }, DEBOUNCE_INTERVAL);
     };
   };
 
   window.utils = {
     isEscEvent: isEscEvent,
+    isEnterEvent: isEnterEvent,
     getRandomNum: getRandomNum,
     getShuffled: getShuffled,
     debounce: debounce

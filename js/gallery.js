@@ -14,18 +14,22 @@
   var picturesSection = document.querySelector('.pictures');
   var gallery = document.querySelector('.big-picture');
 
-
   // при клике на превью
   var onPhotoClick = function (evt) {
-    var target = evt.target;
-    if (target.className === 'picture__img') {
-      target = target.parentNode; // определяем id выбранного фото, вида id="photo_0"
-      var index = target.getAttribute('id').substr(6); // забираем число из id
-      renderGallery(picturesData[index]); // отрисовываем большую фотографию с таким id
-      openGallery(); // открываем попап большой фотографии
+    var target = evt.target.parentNode;
+    if (target.className === 'picture__link') {
+      openGallery(target);
     }
   };
   picturesSection.addEventListener('click', onPhotoClick);
+
+  var onPhotoEnter = function (evt) {
+    var target = evt.target;
+    if (window.utils.isEnterEvent(evt) && target.className === 'picture__link') {
+      openGallery(target);
+    }
+  };
+  picturesSection.addEventListener('keydown', onPhotoEnter);
 
   var renderGallery = function (photo) {
     var commentsList = gallery.querySelector('.social__comments'); // получили старый список комментариев (ul)
@@ -52,7 +56,10 @@
     gallery.querySelector('.social__loadmore').classList.add('visually-hidden');
   };
 
-  var openGallery = function () {
+  var openGallery = function (target) {
+    var index = target.getAttribute('id').substr(6); // забираем число из id
+    renderGallery(picturesData[index]); // отрисовываем большую фотографию с таким id
+
     document.querySelector('body').classList.add('modal-open');
     gallery.classList.remove('hidden');
     document.addEventListener('keydown', galleryEscPress);
@@ -65,7 +72,6 @@
     document.querySelector('body').classList.remove('modal-open');
     gallery.classList.add('hidden');
     document.removeEventListener('keydown', galleryEscPress); // выключаем
-
   };
 
   var galleryEscPress = function (evt) {
@@ -129,7 +135,7 @@
     });
   };
 
-  var switchFilter = window.utils.debounce(function (evt) {
+  var switchFilter = function (evt) {
     var photos = picturesData.slice(0);
     var currentBtn = evt.target;
     var currentFilter = currentBtn.id;
@@ -144,10 +150,10 @@
       clearPictures();
       appendPictures(photos);
     }
-  }, 500);
+  };
 
   filterBtns.forEach(function (btn) {
-    btn.addEventListener('click', switchFilter);
+    btn.addEventListener('click', window.utils.debounce(switchFilter));
   });
 
 

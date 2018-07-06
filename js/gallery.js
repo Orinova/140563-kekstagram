@@ -71,7 +71,9 @@
     document.addEventListener('keydown', onGalleryEscPress);
 
     var galleryCloseBtn = document.querySelector('.big-picture__cancel');
-    galleryCloseBtn.addEventListener('click', closeGallery); // как оно должно называться по Д4? closeHadler? onGalleryClose?
+    galleryCloseBtn.addEventListener('click', function () {
+      closeGallery();
+    });
   };
 
   var closeGallery = function () {
@@ -132,7 +134,7 @@
     });
   };
 
-  var onFilterSwitch = function (evt) {
+  var switchFilter = function (evt) {
     var photos = picturesData.slice(0);
     var currentBtn = evt.target;
     var currentFilter = currentBtn.id;
@@ -150,7 +152,7 @@
   };
 
   filterBtns.forEach(function (btn) {
-    btn.addEventListener('click', window.utils.debounce(onFilterSwitch));
+    btn.addEventListener('click', window.utils.debounce(switchFilter));
   });
 
   // --- получаем данные с сервера

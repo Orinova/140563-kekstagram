@@ -12,7 +12,7 @@
     MAX_COUNT: 'Хэш-тегов не может быть более пяти'
   };
 
-  var uploadSection = document.querySelector('.img-upload'); // общий с effect.js и scale.js
+  var uploadSection = document.querySelector('.img-upload');
   var uploadFile = uploadSection.querySelector('#upload-file');
   var uploadOverlay = uploadSection.querySelector('.img-upload__overlay');
   var uploadCloseBtn = uploadSection.querySelector('.img-upload__cancel');
@@ -32,7 +32,9 @@
       closeUpload();
     });
   };
-  uploadFile.addEventListener('change', openUpload);
+  uploadFile.addEventListener('change', function () {
+    openUpload();
+  });
 
   var closeUpload = function () {
     document.querySelector('body').classList.remove('modal-open');
@@ -72,15 +74,6 @@
 
   // ---------- Валидация
 
-  var checkDublicate = function (array, index) {
-    for (var i = 0; i < array.length; i++) {
-      if (array[index] === array[i] && index !== i) {
-        return true;
-      }
-    }
-    return false;
-  };
-
   var validateHashtags = function () {
     var hashtags = hashtagsInput.value.trim(); // получили значение хэштега, очистили оконечные пробелы
     hashtags = hashtags.toLowerCase(); // сброс регистра
@@ -105,7 +98,7 @@
         if (hashtags[i].substring(1).search('#') !== -1) {
           errorText = Errors.NO_SPACE;
         }
-        if (checkDublicate(hashtags, i)) {
+        if (window.utils.checkDublicate(hashtags, i)) {
           errorText = Errors.DUBLICATE;
         }
       }

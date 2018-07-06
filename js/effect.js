@@ -64,7 +64,9 @@
   var getCurrentEffect = function () {
     return effectsList.querySelector('.effects__radio:checked').value;
   };
-  effectsList.addEventListener('click', getCurrentEffect);
+  effectsList.addEventListener('click', function () {
+    getCurrentEffect();
+  });
   var getSaturation = function () {
     return Math.round(effectPin.offsetLeft / effectLine.offsetWidth * 100);
   };

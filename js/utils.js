@@ -31,6 +31,15 @@
     return array;
   };
 
+  var checkDublicate = function (array, index) {
+    for (var i = 0; i < array.length; i++) {
+      if (array[index] === array[i] && index !== i) {
+        return true;
+      }
+    }
+    return false;
+  };
+
   var debounce = function (fun) {
     var lastTimeout = null;
 
@@ -50,6 +59,7 @@
     isEnterEvent: isEnterEvent,
     getRandomNum: getRandomNum,
     getShuffled: getShuffled,
+    checkDublicate: checkDublicate,
     debounce: debounce
   };
 })();

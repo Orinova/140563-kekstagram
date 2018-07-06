@@ -1,8 +1,9 @@
 'use strict';
 
 (function () {
-// -- Большая картинка:
   var AVATAR_VARIANTS = 6;
+  var ACTIVE_CLASS = 'img-filters__button--active';
+  var INACTIVE_CLASS = 'img-filters--inactive';
   var DESCRIPTIONS = [
     'Тестим новую камеру!',
     'Затусили с друзьями на море',
@@ -13,6 +14,11 @@
   ];
   var picturesSection = document.querySelector('.pictures');
   var gallery = document.querySelector('.big-picture');
+  var picturesData = []; // сюда запишем полученные с сервера данные
+
+  var filtersBox = document.querySelector('.img-filters');
+  var filterBtns = filtersBox.querySelectorAll('.img-filters__button');
+  var filterActiveBtn = filtersBox.querySelector('.img-filters__button--active');
 
   // при клике на превью
   var onPhotoClick = function (evt) {
@@ -80,9 +86,7 @@
     }
   };
 
-  // ------------ Рендер превьюшек
-  var picturesData = [];
-
+  // ------------ Рендер превью
   // Создаем DOM элементы для переданного массива фотографий
   var createPhotoElement = function (index, photo) {
     var photoElement = document.querySelector('#picture').content.querySelector('.picture__link').cloneNode(true);
@@ -104,13 +108,6 @@
   };
 
   // --- Сортировки картинок
-
-  var ACTIVE_CLASS = 'img-filters__button--active';
-  var INACTIVE_CLASS = 'img-filters--inactive';
-
-  var filtersBox = document.querySelector('.img-filters');
-  var filterBtns = filtersBox.querySelectorAll('.img-filters__button');
-  var filterActiveBtn = filtersBox.querySelector('.img-filters__button--active');
 
   var filterMethods = {
     'filter-popular': function () {
@@ -155,7 +152,6 @@
   filterBtns.forEach(function (btn) {
     btn.addEventListener('click', window.utils.debounce(switchFilter));
   });
-
 
   // --- получаем данные с сервера
   var onSuccess = function (data) {

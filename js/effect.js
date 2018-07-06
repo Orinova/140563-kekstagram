@@ -1,11 +1,10 @@
 'use strict';
 
 (function () {
+  var DEFAULT_EFFECT_VALUE = 100;
   var uploadSection = document.querySelector('.img-upload');
   var uploadImgPreview = uploadSection.querySelector('.img-upload__preview');
-  // Эти селекторы общие со scale.js
 
-  var DEFAULT_EFFECT_VALUE = 100;
   var effectScale = uploadSection.querySelector('.scale');
   var effectsList = uploadSection.querySelector('.effects__list');
   var effectLine = uploadSection.querySelector('.scale__line');
@@ -69,17 +68,16 @@
   var getSaturation = function () {
     return Math.round(effectPin.offsetLeft / effectLine.offsetWidth * 100);
   };
-  function getCoordX(elem) {
+  var getCoordX = function (elem) {
     var box = elem.getBoundingClientRect();
     return box.left + pageXOffset;
-  }
+  };
 
-  effectPin.addEventListener('mousedown', function (evt) {
+  var setPin = function (evt) {
     evt.preventDefault();
     var start = evt.clientX;
     var maxOffset = effectLine.offsetWidth;
     var minOffset = getCoordX(effectLevel);
-
     var onMouseMove = function (moveEvt) {
       moveEvt.preventDefault();
       if (moveEvt.clientX <= minOffset || moveEvt.clientX >= minOffset + maxOffset) {
@@ -95,7 +93,6 @@
         setEffect(getCurrentEffect(), getSaturation());
       }
     };
-
     var onMouseUp = function (upEvt) {
       upEvt.preventDefault();
       document.removeEventListener('mousemove', onMouseMove);
@@ -104,11 +101,12 @@
 
     document.addEventListener('mousemove', onMouseMove);
     document.addEventListener('mouseup', onMouseUp);
-  });
+  };
+  effectPin.addEventListener('mousedown', setPin);
 
   var setDefault = function () {
     uploadImgPreview.className = 'img-upload__preview'; // очистить класс фильтра
-    uploadImgPreview.style = ''; // офистить фильтр
+    uploadImgPreview.style = ''; // очистить фильтр
     effectScale.classList.add('hidden'); // спятать ползунок
   };
 

@@ -1,17 +1,18 @@
 'use strict';
 
 (function () {
-
-  var KEYCODE_ESC = 27;
-  var KEYCODE_ENTER = 13;
   var DEBOUNCE_INTERVAL = 500;
+  var KeyCode = {
+    ESC: 27,
+    ENTER: 13
+  };
 
   var isEscEvent = function (evt) {
-    return evt.keyCode === KEYCODE_ESC;
+    return evt.keyCode === KeyCode.ESC;
   };
 
   var isEnterEvent = function (evt) {
-    return evt.keyCode === KEYCODE_ENTER;
+    return evt.keyCode === KeyCode.ENTER;
   };
 
   // Генератор случайных чисел

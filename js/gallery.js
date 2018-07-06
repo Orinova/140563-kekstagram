@@ -68,19 +68,19 @@
 
     document.querySelector('body').classList.add('modal-open');
     gallery.classList.remove('hidden');
-    document.addEventListener('keydown', galleryEscPress);
+    document.addEventListener('keydown', onGalleryEscPress);
 
     var galleryCloseBtn = document.querySelector('.big-picture__cancel');
-    galleryCloseBtn.addEventListener('click', closeGallery);
+    galleryCloseBtn.addEventListener('click', closeGallery); // как оно должно называться по Д4? closeHadler? onGalleryClose?
   };
 
   var closeGallery = function () {
     document.querySelector('body').classList.remove('modal-open');
     gallery.classList.add('hidden');
-    document.removeEventListener('keydown', galleryEscPress); // выключаем
+    document.removeEventListener('keydown', onGalleryEscPress); // выключаем
   };
 
-  var galleryEscPress = function (evt) {
+  var onGalleryEscPress = function (evt) {
     if (window.utils.isEscEvent(evt)) {
       closeGallery();
     }
@@ -88,21 +88,21 @@
 
   // ------------ Рендер превью
   // Создаем DOM элементы для переданного массива фотографий
-  var createPhotoElement = function (index, photo) {
-    var photoElement = document.querySelector('#picture').content.querySelector('.picture__link').cloneNode(true);
-    photoElement.id = index;
-    photoElement.querySelector('.picture__img').alt = photo.description;
-    photoElement.querySelector('.picture__img').src = photo.url;
-    photoElement.querySelector('.picture__stat--likes').textContent = photo.likes;
-    photoElement.querySelector('.picture__stat--comments').textContent = photo.comments.length;
-    return photoElement;
+  var createPhoto = function (index, photo) {
+    var photoCard = document.querySelector('#picture').content.querySelector('.picture__link').cloneNode(true);
+    photoCard.id = index;
+    photoCard.querySelector('.picture__img').alt = photo.description;
+    photoCard.querySelector('.picture__img').src = photo.url;
+    photoCard.querySelector('.picture__stat--likes').textContent = photo.likes;
+    photoCard.querySelector('.picture__stat--comments').textContent = photo.comments.length;
+    return photoCard;
   };
 
   // Заполянем блок на странице созданными DOM-элементами (превью фотографий)
   var appendPictures = function (photos) {
     var fragment = document.createDocumentFragment();
     for (var i = 0; i < photos.length; i++) {
-      fragment.appendChild(createPhotoElement('photo_' + photos[i].id, photos[i]));
+      fragment.appendChild(createPhoto('photo_' + photos[i].id, photos[i]));
     }
     picturesSection.appendChild(fragment);
   };
@@ -132,7 +132,7 @@
     });
   };
 
-  var switchFilter = function (evt) {
+  var onFilterSwitch = function (evt) {
     var photos = picturesData.slice(0);
     var currentBtn = evt.target;
     var currentFilter = currentBtn.id;
@@ -150,7 +150,7 @@
   };
 
   filterBtns.forEach(function (btn) {
-    btn.addEventListener('click', window.utils.debounce(switchFilter));
+    btn.addEventListener('click', window.utils.debounce(onFilterSwitch));
   });
 
   // --- получаем данные с сервера

@@ -12,6 +12,12 @@
     'Цените каждое мгновенье. Цените тех, кто рядом с вами и отгоняйте все сомненья. Не обижайте всех словами......',
     'Вот это тачка!'
   ];
+  var PHOTO_PREFIX = 'photo_';
+  var NEW_PHOTO_QUANTITY = 10;
+  var LOAD_STEP = 5; // сколько комментариев в одной подгрузке
+  var commentsOnPage = 0; // счетчик открытых комментариев на странице
+  var showedPhoto = 0; // при открытии запишем index просматриваемого фото
+
   var picturesSection = document.querySelector('.pictures');
   var gallery = document.querySelector('.big-picture');
   var picturesData = []; // сюда запишем полученные с сервера данные
@@ -20,7 +26,16 @@
   var filterBtns = filtersBox.querySelectorAll('.img-filters__button');
   var filterActiveBtn = filtersBox.querySelector('.img-filters__button--active');
 
-  // при клике на превью
+  var loadmoreBtn = document.querySelector('.social__loadmore');
+  var commentsNum = document.querySelector('.comments-num');
+  var commentsCount = document.querySelector('.comments-count');
+
+  // Получение и настройка шаблона комментария
+  var commentsList = gallery.querySelector('.social__comments'); // получили старый список комментариев (ul)
+  var socialComment = gallery.querySelector('.social__comment').cloneNode(true); // скопировали
+  socialComment.classList.add('social__comment--text'); // шаблон для комментрия
+
+
   var onPhotoClick = function (evt) {
     var target = evt.target.parentNode;
     if (target.className === 'picture__link') {
@@ -37,35 +52,19 @@
   };
   picturesSection.addEventListener('keydown', onPhotoEnter);
 
-  var renderGallery = function (photo) {
-    var commentsList = gallery.querySelector('.social__comments'); // получили старый список комментариев (ul)
-    var socialComment = gallery.querySelector('.social__comment').cloneNode(true); // скопировали
-    socialComment.classList.add('social__comment--text'); // делаем шаблон для комментрия (li)
-    commentsList.innerHTML = '';
-
-    var fragment = document.createDocumentFragment();
-    for (var i = 0; i < photo.comments.length; i++) {
-      var comment = socialComment.cloneNode(true);
-      comment.querySelector('.social__picture').src = 'img/avatar-' + window.utils.getRandomNum(1, AVATAR_VARIANTS) + '.svg';
-      comment.querySelector('.social__text').textContent = photo.comments[i];
-      fragment.appendChild(comment);
-    }
-    commentsList.appendChild(fragment);
-
-    // Подставляем инфу в большую картинку
+  var setPhoto = function (photo) {
+    var descriptionVariants = DESCRIPTIONS.length - 1;
     gallery.querySelector('.big-picture__img img').src = photo.url;
-    gallery.querySelector('.social__caption').textContent = DESCRIPTIONS[window.utils.getRandomNum(0, 5)]; // временно
+    gallery.querySelector('.social__caption').textContent = DESCRIPTIONS[window.utils.getRandomNum(0, descriptionVariants)];
     gallery.querySelector('.likes-count').textContent = photo.likes;
-    gallery.querySelector('.comments-count').textContent = photo.comments.length;
-
-    gallery.querySelector('.social__comment-count').classList.add('visually-hidden');
-    gallery.querySelector('.social__loadmore').classList.add('visually-hidden');
+    commentsList.innerHTML = '';
+    addComments(photo, LOAD_STEP);
+    commentsCount.textContent = photo.comments.length;
   };
 
   var openGallery = function (target) {
-    var index = target.getAttribute('id').substr(6); // забираем число из id
-    renderGallery(picturesData[index]); // отрисовываем большую фотографию с таким id
-
+    showedPhoto = target.getAttribute('id').substr(PHOTO_PREFIX.length);
+    setPhoto(picturesData[showedPhoto]);
     document.querySelector('body').classList.add('modal-open');
     gallery.classList.remove('hidden');
     document.addEventListener('keydown', onGalleryEscPress);
@@ -80,6 +79,7 @@
     document.querySelector('body').classList.remove('modal-open');
     gallery.classList.add('hidden');
     document.removeEventListener('keydown', onGalleryEscPress); // выключаем
+    commentsOnPage = 0;
   };
 
   var onGalleryEscPress = function (evt) {
@@ -87,6 +87,7 @@
       closeGallery();
     }
   };
+
 
   // ------------ Рендер превью
   // Создаем DOM элементы для переданного массива фотографий
@@ -104,19 +105,20 @@
   var appendPictures = function (photos) {
     var fragment = document.createDocumentFragment();
     for (var i = 0; i < photos.length; i++) {
-      fragment.appendChild(createPhoto('photo_' + photos[i].id, photos[i]));
+      fragment.appendChild(createPhoto(PHOTO_PREFIX + photos[i].id, photos[i]));
     }
     picturesSection.appendChild(fragment);
   };
 
-  // --- Сортировки картинок
+
+  // ------------ Сортировки картинок
 
   var filterMethods = {
     'filter-popular': function () {
       return picturesData;
     },
     'filter-new': function () {
-      var newPhotos = picturesData.slice(0, 10);
+      var newPhotos = picturesData.slice(0, NEW_PHOTO_QUANTITY);
       newPhotos = window.utils.getShuffled(newPhotos);
       return newPhotos;
     },
@@ -155,7 +157,37 @@
     btn.addEventListener('click', window.utils.debounce(switchFilter));
   });
 
-  // --- получаем данные с сервера
+
+  // ------------ Функция добавления комментариев
+  var addComments = function (photo, num) {
+    var fragment = document.createDocumentFragment();
+
+    // начинаем обход с последнего комментария на странице (commentsOnPage) до конца массива,
+    // если количество итераций >= num (пять раз по ТЗ) - прекращаем цикл
+    for (var i = commentsOnPage; i < photo.comments.length; i++) {
+      if (i - commentsOnPage >= num) {
+        break;
+      }
+      var comment = socialComment.cloneNode(true);
+      comment.querySelector('.social__picture').src = 'img/avatar-' + window.utils.getRandomNum(1, AVATAR_VARIANTS) + '.svg';
+      comment.querySelector('.social__text').textContent = photo.comments[i];
+      fragment.appendChild(comment);
+    }
+    commentsOnPage = i;
+    commentsList.appendChild(fragment);
+    commentsNum.textContent = commentsOnPage;
+
+    if (commentsOnPage === photo.comments.length) {
+      loadmoreBtn.classList.add('hidden');
+    } else {
+      loadmoreBtn.classList.remove('hidden');
+    }
+  };
+  loadmoreBtn.addEventListener('click', function () {
+    addComments(picturesData[showedPhoto], LOAD_STEP);
+  });
+
+  // ------------ получаем данные с сервера
   var onSuccess = function (data) {
     picturesData = data;
     // при получении добавляю id в массив для открытия большого фото

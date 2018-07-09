@@ -1,17 +1,19 @@
 'use strict';
 
 (function () {
-  var MAX_HASHTAGS = 5;
-  var MAX_HASHTAG_LENGTH = 20;
+  var hashtag = {
+    MAX: 5,
+    MIN_LENGTH: 2,
+    MAX_LENGTH: 20
+  };
   var Errors = {
     NO_SHARP: 'Хэш-тег должен начинается с символа # (решётка)',
     EMPTY: 'Вы ввели пустой хэш-тег',
-    TOO_LONG: 'Длина хэш-тега не может превышать ' + MAX_HASHTAG_LENGTH + ' символов',
+    TOO_LONG: 'Длина хэш-тега не может превышать ' + hashtag.MAX_LENGTH + ' символов',
     NO_SPACE: 'Разделите хэш-теги пробелами',
     DUBLICATE: 'Хэш-теги не должны повторяться',
     MAX_COUNT: 'Хэш-тегов не может быть более пяти'
   };
-
   var uploadSection = document.querySelector('.img-upload');
   var uploadFile = uploadSection.querySelector('#upload-file');
   var uploadOverlay = uploadSection.querySelector('.img-upload__overlay');
@@ -81,7 +83,7 @@
 
     if (hashtags !== '') { // если поле не пустое, то проверяем его
       hashtags = hashtags.split(/\s+/); // для этого разобъем на массив
-      if (hashtags.length > MAX_HASHTAGS) {
+      if (hashtags.length > hashtag.MAX) {
         errorText = Errors.MAX_COUNT;
       }
 
@@ -89,10 +91,10 @@
         if (hashtags[i][0] !== '#') {
           errorText = Errors.NO_SHARP;
         }
-        if (hashtags[i].length > 20) {
+        if (hashtags[i].length > hashtag.MAX_LENGTH) {
           errorText = Errors.TOO_LONG;
         }
-        if (hashtags[i][0] === '#' && hashtags[i].length < 2) {
+        if (hashtags[i][0] === '#' && hashtags[i].length < hashtag.MIN_LENGTH) {
           errorText = Errors.EMPTY;
         }
         if (hashtags[i].substring(1).search('#') !== -1) {

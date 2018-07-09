@@ -12,6 +12,7 @@
     uploadStart.classList.add('hidden');
     errorTemplate.classList.remove('hidden');
     uploadForm.appendChild(errorTemplate);
+    document.addEventListener('keydown', onEscPress);
   };
 
   var setMessage = function (message) {
@@ -22,6 +23,13 @@
     errorTemplate.classList.add('hidden');
     uploadForm.removeChild(errorTemplate);
     uploadStart.classList.remove('hidden');
+  };
+
+  var onEscPress = function (evt) { // возможность очистить ошибку (и форму) по нажатию Esc
+    if (window.utils.isEscEvent(evt)) {
+      onReset();
+      document.removeEventListener('keydown', onEscPress);
+    }
   };
 
   var onReset = function () {

@@ -58,7 +58,7 @@
     gallery.querySelector('.social__caption').textContent = DESCRIPTIONS[window.utils.getRandomNum(0, descriptionVariants)];
     gallery.querySelector('.likes-count').textContent = photo.likes;
     commentsList.innerHTML = '';
-    addComments(photo, LOAD_STEP);
+    addComments(photo);
     commentsCount.textContent = photo.comments.length;
   };
 
@@ -159,13 +159,13 @@
 
 
   // ------------ Функция добавления комментариев
-  var addComments = function (photo, num) {
+  var addComments = function (photo) {
     var fragment = document.createDocumentFragment();
 
     // начинаем обход с последнего комментария на странице (commentsOnPage) до конца массива,
-    // если количество итераций >= num (пять раз по ТЗ) - прекращаем цикл
+    // если количество итераций >= LOAD_STEP (пять раз по ТЗ) - прекращаем цикл
     for (var i = commentsOnPage; i < photo.comments.length; i++) {
-      if (i - commentsOnPage >= num) {
+      if (i - commentsOnPage >= LOAD_STEP) {
         break;
       }
       var comment = socialComment.cloneNode(true);
@@ -184,7 +184,7 @@
     }
   };
   loadmoreBtn.addEventListener('click', function () {
-    addComments(picturesData[showedPhoto], LOAD_STEP);
+    addComments(picturesData[showedPhoto]);
   });
 
   // ------------ получаем данные с сервера
